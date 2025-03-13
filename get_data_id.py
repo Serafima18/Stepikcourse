@@ -7,20 +7,24 @@ import ast
 import json
 import requests
 import datetime
+import yaml
 
 # Enter parameters below:
 # 1. Get your keys at https://stepik.org/oauth2/applications/
 # (client type = confidential, authorization grant type = client credentials)
 
-client_id = '5cM0RakPR2l6JnJXHEfZ4MwEvNbGl6A8CQxvfgKZ'
-client_secret = 'qmOiK5BgP5Z9GFIlgYzOMf4NmAXQ0WYePU4GBBv2vOAJfPSS0ZVp6mCOarXhcE6tfhLNK5BfkquGNG7zojBzzVH7arcc10CfxkaCmJ1ELsVc9tJ772JBpDx5vFqffdsg'
+with open('creds.yaml', 'r') as file:
+    creds = yaml.safe_load(file)
+
+client_id = creds['client_id']
+client_secret = creds['client_secret']
 api_host = 'https://stepik.org'
 
 # client_id = '...'
 # client_secret = '...'
 # api_host = 'http://127.0.0.1' # save to localhost
 
-course_id = 401
+course_id = 234353
 mode = 'SAVE'  # IMPORTANT: use SAVE first, then use PASTE with uncommented (or changed) lines above (client keys and host)
 
 cross_domain = True  # to re-upload videos
