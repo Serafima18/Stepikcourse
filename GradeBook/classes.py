@@ -1,5 +1,10 @@
 import requests
 
+'''
+Иерархия в степике:
+    Classe -> Course -> Section -> Unit -> Steps
+'''
+
 
 #  Работа на уровне класса
 class Class:
