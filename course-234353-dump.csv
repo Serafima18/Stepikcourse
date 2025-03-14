@@ -1,0 +1,5 @@
+course,234353,"{'title': 'Обучающий курс для обучения', 'summary': '', 'course_format': '', 'language': 'ru', 'requirements': '', 'workload': '', 'is_public': False, 'description': '', 'certificate': '', 'target_audience': ''}"
+section,512975,"{'title': 'Новый модуль', 'position': 1, 'course': 234353}"
+unit,1682069,"{'position': 1, 'section': 512975, 'lesson': 1659223}"
+lesson,1659223,"{'title': 'Первый урок', 'is_public': False, 'language': 'ru'}"
+step-source,6854455,"{'lesson': 1659223, 'position': 1, 'block': {'name': 'text', 'text': 'Урок сгенерирован роботом ;)', 'video': None, 'options': {}, 'subtitle_files': [], 'is_deprecated': False, 'source': {}, 'subtitles': {}, 'tests_archive': None, 'feedback_correct': '', 'feedback_wrong': ''}, 'cost': 0}"
