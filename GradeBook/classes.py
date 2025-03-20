@@ -8,8 +8,16 @@ import requests
 
 #  Работа на уровне класса
 class Class:
+    def __init__(self, url, token) -> None:
+        self.url = url
+        self.token = token
+        self.response = None
+
     #  Послать запрос на информацию о классе
-    def __get_request(self):
+    def __fetch(self) -> None:
+        if (self.response is not None):
+            return
+
         headers = {
             'Authorization': f'Bearer {self.token}',
             'Content-Type': 'application/json'
@@ -17,25 +25,18 @@ class Class:
 
         self.response = requests.get(self.url, headers=headers)
 
-    def __init__(self, _url, _token) -> None:
-        self.url = _url
-        self.token = _token
-        self.response = None
-        self.struct = None
-
     #  Получить id класса
-    def get_class_id(self):
-        self.__get_request()
+    def get_class_id(self) -> int | None:
+        self.__fetch()
         answer = self.response.json()
         if self.response.ok:
             return int(answer['classes'][0]['id'])
         else:
-            print('error')
             return None
 
     #  Получить id владельца класса
-    def get_owner(self):
-        self.__get_request()
+    def get_owner(self) -> int | None:
+        self.__fetch()
 
         answer = self.response.json()
         if self.response.ok:
@@ -44,8 +45,8 @@ class Class:
             return None
 
     #  Получить название класса
-    def get_title(self):
-        self.__get_request()
+    def get_title(self) -> str | None:
+        self.__fetch()
 
         answer = self.response.json()
         if self.response.ok:
@@ -54,8 +55,8 @@ class Class:
             return None
 
     #  Получить id класса. Номер курса != id курса
-    def get_id_course(self):
-        self.__get_request()
+    def get_id_course(self) -> int | None:
+        self.__fetch()
 
         answer = self.response.json()
         if self.response.ok:
@@ -64,8 +65,8 @@ class Class:
             return None
 
     #  Получить кол-во учащихся
-    def get_students_count(self):
-        self.__get_request()
+    def get_students_count(self) -> int | None:
+        self.__fetch()
 
         answer = self.response.json()
         if self.response.ok:
@@ -82,7 +83,10 @@ class Course:
         self.response = None
 
     #  Послать запрос на информацию о курсе
-    def __get_struct_request(self):
+    def __fetch(self) -> None:
+        if (self.response is not None):
+            return
+
         url = "https://stepik.org/api/courses/" + str(self.course)
         headers = {
             'Authorization': f'Bearer {self.token}',
@@ -91,8 +95,8 @@ class Course:
         self.response = requests.get(url, headers=headers)
 
     #  Получить секции(модули) курса
-    def get_sections(self) -> list[int]:
-        self.__get_struct_request()
+    def get_sections(self) -> list[int] | None:
+        self.__fetch()
         answer = self.response.json()
         if self.response.ok:
             return answer['courses'][0]['sections']
@@ -100,8 +104,8 @@ class Course:
             return None
 
     #  Получить название курса
-    def get_title(self) -> str:
-        self.__get_struct_request()
+    def get_title(self) -> str | None:
+        self.__fetch()
         answer = self.response.json()
         if self.response.ok:
             return answer['courses'][0]['title']
@@ -109,8 +113,8 @@ class Course:
             return None
 
     #  Получить суммарное кол-во уроков
-    def total_units(self) -> int:
-        self.__get_struct_request()
+    def total_units(self) -> int | None:
+        self.__fetch()
         answer = self.response.json()
         if self.response.ok:
             return answer['courses'][0]['total_units']
@@ -121,64 +125,64 @@ class Course:
 #  Работа на уровне модуля
 #  Модуль и секция в степике одно и тоже
 class Module:
-    def __init__(self, _token: str) -> None:
-        self.token = _token
-        self.module = None
+    def __init__(self, token: str, module: str) -> None:
+        self.module = module
+        self.token = token
+        self.units_response = None
+        self.lessons_response = None
+
+    def __fetch(self) -> None:
+        if (self.units_response is None):
+            url = "https://stepik.org/api/sections?ids%5B%5D=" + self.module
+            headers = {
+                'Authorization': f'Bearer {self.token}',
+                'Content-Type': 'application/json'
+            }
+            self.units_response = requests.get(url, headers=headers)
+        if (self.lessons_response is None):
+            units = self.units_response.json()['sections'][0]['units']
+            url = "https://stepik.org/api/units?ids%5B%5D=" + str(units.pop(0))
+            url += ''.join(["&ids%5B%5D=" + str(unit) for unit in units])
+            headers = {
+                'Authorization': f'Bearer {self.token}',
+                'Content-Type': 'application/json'
+            }
+            self.lessons_response = requests.get(url, headers=headers)
 
     #  Получить юниты из секции(модуля)
-    def get_units_from_section(self, module: int) -> list:
-        url = "https://stepik.org/api/sections?ids%5B%5D=" + str(module)
-        headers = {
-            'Authorization': f'Bearer {self.token}',
-            'Content-Type': 'application/json'
-        }
-        self.module = requests.get(url, headers=headers)
-        answer = self.module.json()
-        if self.module.ok:
+    def get_units_from_section(self) -> list | None:
+        self.__fetch()
+        answer = self.units_response.json()
+        if self.units_response.ok:
             mod = answer['sections'][0]['units']
             return mod
         else:
             return None
 
     #  Получить уроки из секции(модуля)
-    def get_lessons_from_section(self, module: int) -> list:
-        #  Сначала нужно получить юниты из модуля
-        units = self.get_units_from_section(str(module))
-        units_copy = units.copy()
+    def get_lessons_from_section(self) -> dict | None:
+        self.__fetch()
         '''
         Теперь нужно сопоставить юниту урок
         (не понятно, зачем так сделано, возможно,
         что б можно копировать уроки в другие курсы)
         '''
-        url = "https://stepik.org/api/units?ids%5B%5D=" + str(units.pop(0))
-        url += ''.join(["&ids%5B%5D=" + str(module) for module in units])
-        headers = {
-            'Authorization': f'Bearer {self.token}',
-            'Content-Type': 'application/json'
-        }
-        self.modules = requests.get(url, headers=headers)
-        answer = self.modules.json()
-        if self.modules.ok:
-            lessons = []
+        answer = self.lessons_response.json()
+        if self.lessons_response.ok:
+            lessons = dict()
             #  Сопоставление
-            for i in answer["units"]:
-                for unit in units_copy:
-                    if (i['id'] == unit):
-                        lessons.append(i["lesson"])
+            for unit in answer["units"]:
+                lessons[unit['id']] = unit['lesson']
             return lessons
         else:
             return None
 
     #  Получить название секции(модуля)
-    def get_module_title(self, module: int) -> str:
-        url = "https://stepik.org/api/sections?ids%5B%5D=" + str(module)
-        headers = {
-            'Authorization': f'Bearer {self.token}',
-            'Content-Type': 'application/json'
-        }
-        self.modules = requests.get(url, headers=headers)
-        answer = self.modules.json()
-        if self.modules.ok:
+    def get_module_title(self) -> str:
+        self.__fetch()
+
+        answer = self.units_response.json()
+        if self.units_response.ok:
             mod = answer['sections'][0]['title']
             return mod
         else:
@@ -187,19 +191,27 @@ class Module:
 
 #  Работа на уровне урока
 class Lesson:
-    def __init__(self, _token: str) -> None:
-        self.token = _token
+    def __init__(self, token: str, lesson: str) -> None:
+        self.token = token
+        self.lesson = lesson
+        self.response = None
 
-    #  Получить шаги в уроке
-    def get_steps_in_lesson(self, lesson: int) -> list:
-        url = "https://stepik.org/api/lessons?ids%5B%5D=" + str(lesson)
+    #  Запрос на данные
+    def __fetch(self) -> None:
+        if (self.response is not None):
+            return
+        url = "https://stepik.org/api/lessons?ids%5B%5D=" + self.lesson
         headers = {
             'Authorization': f'Bearer {self.token}',
             'Content-Type': 'application/json'
         }
-        self.steps_in_lesson = requests.get(url, headers=headers)
-        answer = self.steps_in_lesson.json()
-        if self.steps_in_lesson.ok:
+        self.response = requests.get(url, headers=headers)
+
+    #  Получить шаги в уроке
+    def get_steps_in_lesson(self) -> list | None:
+        self.__fetch()
+        answer = self.response.json()
+        if self.response.ok:
             mod = answer['lessons'][0]['steps']
             return mod
         else:
@@ -208,35 +220,27 @@ class Lesson:
 
 #  Работа на уровне шага
 class Step:
-    def __init__(self, _token: str) -> None:
-        self.token = _token
+    def __init__(self, token: str, step: str) -> None:
+        self.token = token
+        self.step = step
+        self.response = None
+
+    def __fetch(self) -> None:
+        if (self.response is not None):
+            return
+        url = "https://stepik.org/api/steps?ids%5B%5D=" + self.step
+        headers = {
+            'Authorization': f'Bearer {self.token}',
+            'Content-Type': 'application/json'
+        }
+        self.response = requests.get(url, headers=headers)
 
     #  Получить имя в шаге. Через имя можно узнать о типе урока
-    def get_name_in_step(self, step: int) -> str:
-        url = "https://stepik.org/api/steps?ids%5B%5D=" + str(step)
-        headers = {
-            'Authorization': f'Bearer {self.token}',
-            'Content-Type': 'application/json'
-        }
-        self.name_in_step = requests.get(url, headers=headers)
-        answer = self.name_in_step.json()
-        if self.name_in_step.ok:
+    def get_name_in_step(self) -> str | None:
+        self.__fetch()
+        answer = self.response.json()
+        if self.response.ok:
             mod = answer['steps'][0]['block']['name']
-            return mod
-        else:
-            return None
-
-    #  Получить текст из шага
-    def get_text_in_step(self, step: int) -> str:
-        url = "https://stepik.org/api/steps?ids%5B%5D=" + str(step)
-        headers = {
-            'Authorization': f'Bearer {self.token}',
-            'Content-Type': 'application/json'
-        }
-        self.text_in_step = requests.get(url, headers=headers)
-        answer = self.text_in_step.json()
-        if self.text_in_step.ok:
-            mod = answer['steps'][0]['block']['text']
             return mod
         else:
             return None
@@ -244,45 +248,47 @@ class Step:
 
 #  Работа с табелем успеваемости
 class GradeBook:
-    def __init__(self, _token: str) -> None:
-        self.token = _token
+    def __init__(self, token: str, course: str, klass: str) -> None:
+        self.token = token
+        self.course = course
+        self.klass = klass
+        self.response = None
 
-    #  Получить все оценки всех студентов
-    def get_all_grades(self, course: int, klass: int) -> list[dict]:
-        url = "https://stepik.org/api/course-grades?course=" + str(course) + "&is_teacher=false&klass=" + str(klass) + "&order=-score%2C-id&page=1&search="
+    def __fetch(self) -> None:
+        if (self.response is not None):
+            return
+        url = ("https://stepik.org/api/course-grades?course=" + self.course +
+               "&is_teacher=false&klass=" + self.klass +
+               "&order=-score%2C-id&page=1&search=")
         headers = {
             'Authorization': f'Bearer {self.token}',
             'Content-Type': 'application/json'
         }
-        self.all_grades = requests.get(url, headers=headers)
-        answer = self.all_grades.json()
-        if self.all_grades.ok:
+        self.response = requests.get(url, headers=headers)
+
+    #  Получить все оценки всех студентов
+    def get_all_grades(self) -> list[dict]:
+        self.__fetch()
+        answer = self.response.json()
+        if self.response.ok:
             mod = answer['course-grades']
             return mod
         else:
             return None
 
     #  Получить все оценки для студента
-    def get_student_grades(self, course: int, klass: int, student_id: int) -> dict:
-        url = "https://stepik.org/api/course-grades?course=" + str(course) + "&is_teacher=false&klass=" + str(klass) + "&order=-score%2C-id&page=1&search="
-        headers = {
-            'Authorization': f'Bearer {self.token}',
-            'Content-Type': 'application/json'
-        }
-        self.student_grades = requests.get(url, headers=headers)
-        answer = self.student_grades.json()
-        if self.student_grades.ok:
-            grades = answer['course-grades']
-            for i in grades:
-                if (i['user'] == student_id):
-                    return i['results']
-            return dict()
-        else:
+    def get_student_grades(self, student_id: str) -> dict | None:
+        all_grades = self.get_all_grades()
+        if (all_grades is None):
             return None
+        for i in all_grades:
+            if (i['user'] == int(student_id)):
+                return i['results']
+        return dict()
 
     #  Получить пары: step_id - score, для студента
-    def get_student_score(self, course: int, klass: int, student_id: int) -> list[list]:
-        grades = self.get_student_grades(course, klass, student_id)
+    def get_student_score(self, student_id: int) -> list[list] | None:
+        grades = self.get_student_grades(student_id)
         if (grades is None):
             return None
         score = []
@@ -293,11 +299,15 @@ class GradeBook:
 
 #  Класс для работы с пользователями
 class User:
-    def __init__(self, _token: str) -> None:
-        self.token = _token
+    def __init__(self, token: str, user_id: str) -> None:
+        self.token = token
+        self.user_id = user_id
+        self.response = None
 
-    def __get_user_info(self, user_id: int) -> list[dict]:
-        url = "https://stepik.org/api/users?ids%5B%5D=" + str(user_id)
+    def __fetch(self) -> None:
+        if (self.response is not None):
+            return
+        url = "https://stepik.org/api/users?ids%5B%5D=" + self.user_id
         headers = {
             'Authorization': f'Bearer {self.token}',
             'Content-Type': 'application/json'
@@ -310,8 +320,8 @@ class User:
             return None
 
     #  Получить имя пользователя
-    def get_user_name(self, user_id: int) -> str:
-        info = self.__get_user_info(user_id)
+    def get_user_name(self) -> str | None:
+        info = self.__fetch()
         if (info is None):
             return None
         return info[0]['full_name']
