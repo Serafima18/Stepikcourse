@@ -1,7 +1,16 @@
 import pyparsing as pp
+from step_classes import Step, StepString
 
 
-def parse_str(text):
+def parse_step(self):
+    pass
+
+
+Step.parse_step = parse_step
+
+
+def parse_str(self):
+    text = str(self)
     lines = [line for line in text.splitlines()]
     results = {
         "question": "",
@@ -28,13 +37,4 @@ def parse_str(text):
     return results
 
 
-txt =\
-"""Хочу задать вопрос
-
-Какой ваш любимый цвет?
-
-ANSWER: Синий
-"""
-
-res = parse_str(txt)
-print(res)
+StepString.parse_step = parse_str
