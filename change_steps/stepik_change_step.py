@@ -6,8 +6,8 @@ from get_steps_id import _steps_id, get_token
 def update_step(step_id, token, txt):
     url = f'https://stepik.org/api/steps/{step_id}'
     headers = {'Authorization': f'Bearer {token}', 'Content-type': 'application/json'}
-    data = {'step': {'content': txt}}
-    response = requests.put(url, headers=headers, json=data)  # ругается на put, path и post
+    data = {'step': {'text': txt}}
+    response = requests.patch(url, headers=headers, json=data)  # ругается на put, patch и post
     print(response.status_code)
     print(response.json())
 

@@ -1,6 +1,7 @@
 import csv
 import requests
 import yaml
+import json
 
 
 def get_token(client_id, client_secret, api):
@@ -8,7 +9,7 @@ def get_token(client_id, client_secret, api):
     resp = requests.post(f'{api}/oauth2/token/',
                              data={'grant_type': 'client_credentials'},
                              auth=auth)
-    return resp.json().get('access_token', None)
+    return json.loads(resp.text)['access_token']
 
 
 with open('../creds.yaml', 'r') as file:
@@ -52,10 +53,3 @@ def _steps_id():
     lessons_ids = [unit['lesson'] for unit in units]
     lessons = fetch_objects('lesson', lessons_ids)
     return [step for lesson in lessons for step in lesson['steps']]
-
-
-step_ids = _steps_id()
-csv_file = open(f'steps-{course_id}-dump.csv', 'w')
-csv_writer = csv.writer(csv_file)
-csv_writer.writerows([step_ids])
-csv_file.close()

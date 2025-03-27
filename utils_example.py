@@ -1,9 +1,4 @@
-import markdown as md
-
-
-def from_md_to_html(txt):
-    return md.markdown(txt)
-
+from utils import utl
 
 md_txt = """
 # Делаем заголовки
@@ -30,7 +25,7 @@ _Теперь курсивом._
 """
 
 # Преобразование Markdown в HTML
-html_txt = from_md_to_html(md_txt)
+html_txt = utl(md_txt)
 
 # Вывод результата
 print(html_txt)
