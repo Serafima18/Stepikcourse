@@ -24,4 +24,8 @@ response = requests.post(f'{api_host}/oauth2/token/',
                          auth=auth)
 token = response.json().get('access_token', None)
 
+if not token:
+    print('Unable to authorize with provided credentials')
+    exit(1)
+
 print(f'Token: {token}')

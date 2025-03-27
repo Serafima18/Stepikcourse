@@ -94,8 +94,10 @@ class Course:
         }
         self.response = requests.get(url, headers=headers)
 
-    #  Получить секции(модули) курса
     def get_sections(self) -> list[int] | None:
+        '''
+        Получить секции(модули) курса
+        '''
         self.__fetch()
         answer = self.response.json()
         if self.response.ok:
