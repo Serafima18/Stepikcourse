@@ -3,14 +3,18 @@ from step_classes import Step, StepString
 
 
 def parse_step(self):
-    pass
+    return {"data": ""}
 
 
-Step.parse_step = parse_step
+def get_txt(self):
+    txt = self.question
+    for ans in self.answer:
+        txt += '\nANSWER: ' + ans
+    return txt
 
 
 def parse_str(self):
-    text = str(self)
+    text = self.get_txt()
     lines = [line for line in text.splitlines()]
     results = {
         "question": "",
@@ -32,9 +36,12 @@ def parse_str(self):
 
         if parse_answer.matches(line):
             answer_result = parse_answer.parseString(line)
-            results["answer"].append(" ".join(answer_result))
+            results["answer"].append(" ".join(answer_result).strip().lower())
 
     return results
 
 
-StepString.parse_step = parse_str
+def add_methods():
+    Step.parse_step = parse_step
+    StepString.get_txt = get_txt
+    StepString.parse_step = parse_str

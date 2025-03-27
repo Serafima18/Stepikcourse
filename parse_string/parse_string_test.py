@@ -1,16 +1,16 @@
-from parse_string import parse_str
+import parse_string as ps
+from step_classes import Step, StepString
+
+ps.add_methods()
+
+
+def test_parsing():
+    step_test = Step(1, "")
+    ans = {"data": ""}
+    assert step_test.parse_step() == ans
 
 
 def test_parsing_string():
-    text = \
-"""Хочу задать вопрос
-
-Какой ваш любимый цвет?
-
-ANSWER: Синий
-"""
-    right_ans = {}
-
-    right_ans["question"] = "Хочу задать вопросКакой ваш любимый цвет?"
-    right_ans["answer"] = ["Синий"]
-    assert right_ans == parse_str(text)
+    step_test = StepString(1, "Хочу задать вопрос", "Какой ваш любимый цвет?", ["Синий", "Красный"])
+    right_ans = {"question": "Какой ваш любимый цвет?", "answer": ["синий", "красный"]}
+    assert right_ans == step_test.parse_step()
