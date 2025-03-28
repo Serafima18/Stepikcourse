@@ -31,3 +31,21 @@ ANSWER: MIPT
     step_test.parse_step()
     assert step_test.question == 'Попросим студента написать "MIPT". Напишите "MIPT".'
     assert step_test.answer == ["mipt"]
+
+
+def test_parsing_string3():
+    text = \
+'''
+Попросим студента написать "Я учусь в МФТИ". Напишите  "Я учусь в МФТИ".
+
+Много строк в условии.
+
+ANSWER:  Я учусь в МФТИ
+
+'''
+    step_test = StepString(1, "Хочу задать вопрос", text)
+    step_test.parse_step()
+    assert step_test.question == \
+'''Попросим студента написать "Я учусь в МФТИ". Напишите  "Я учусь в МФТИ".
+Много строк в условии.'''
+    assert step_test.answer == ["я учусь в мфти"]

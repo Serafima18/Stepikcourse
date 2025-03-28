@@ -134,6 +134,8 @@ class StepString(Step):
 
             if not self.answer:
                 if not parse_answer.matches(line):
+                    if self.question:
+                        self.question += '\n'
                     self.question += line
 
             if parse_answer.matches(line):
