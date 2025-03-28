@@ -123,3 +123,133 @@ class StepikAPI:
         csv_writer = csv.writer(csv_file)
         csv_writer.writerows(self.data)
         csv_file.close()
+
+class Students:
+    '''
+    Класс для работы с учениками класса
+    '''
+    def __init__(self, token: str, class_id: str) -> None:
+        self.token = token
+        self.class_id = class_id
+        self.__response = None
+
+    def __fetch(self) -> None:
+        if (self.__response is not None):
+            return
+        url = "https://stepik.org/api/students?klass=" + str(self.class_id) + "&page=1"
+        headers = {
+            'Authorization': f'Bearer {self.token}',
+            'Content-Type': 'application/json'
+        }
+        self.__response = requests.get(url, headers=headers)
+        if self.__response.ok:
+            self.__response = self.__response.json()
+        else:
+            self.__response = None
+
+    def get_students_id(self) -> str | None:
+        '''
+        Получить имя пользователя
+        '''
+        self.__fetch()
+        students = self.__response
+        if (students is None):
+            return None
+        id = []
+        for i in students['students']:
+            id.append(i['user'])
+        return id
+
+class User:
+    '''
+    Класс для работы с пользователями
+    '''
+    def __init__(self, token: str, user_id: str) -> None:
+        self.token = token
+        self.user_id = user_id
+        self.__response = None
+
+    def __fetch(self) -> None:
+        if (self.__response is not None):
+            return
+        url = "https://stepik.org/api/users?ids%5B%5D=" + self.user_id
+        headers = {
+            'Authorization': f'Bearer {self.token}',
+            'Content-Type': 'application/json'
+        }
+        self.__response = requests.get(url, headers=headers)
+        if self.__response.ok:
+            self.__response = self.__response.json()
+        else:
+            self.__response = None
+
+
+    def get_user_name(self) -> str | None:
+        '''
+        Получить имя пользователя
+        '''
+        self.__fetch()
+        user = self.__response
+        if (user is None):
+            return None
+        return user['users'][0]['full_name']
+
+class GradeBook:
+    '''
+    Работа с табелем успеваемости
+    '''
+    def __init__(self, token: str, course: str, klass: str) -> None:
+        self.token = token
+        self.course = course
+        self.klass = klass
+        self.response = None
+
+    def __fetch(self) -> None:
+        if (self.response is not None):
+            return
+        url = ("https://stepik.org/api/course-grades?course=" + self.course +
+               "&is_teacher=false&klass=" + self.klass +
+               "&order=-score%2C-id&page=1&search=")
+        headers = {
+            'Authorization': f'Bearer {self.token}',
+            'Content-Type': 'application/json'
+        }
+        self.response = requests.get(url, headers=headers)
+        if self.response.ok:
+            self.response = self.response.json()
+        else:
+            self.response = None
+
+    def get_all_grades(self) -> list[dict]:
+        '''
+        Получить все оценки всех студентов
+        '''
+        self.__fetch()
+        if self.response is None:
+            return None
+        else:
+            return self.response['course-grades']
+
+    def get_student_grades(self, student_id: str) -> dict | None:
+        '''
+        Получить все оценки для студента
+        '''
+        all_grades = self.get_all_grades()
+        if (all_grades is None):
+            return None
+        for i in all_grades:
+            if (i['user'] == int(student_id)):
+                return i['results']
+        return dict()
+
+    def get_student_score(self, student_id: int) -> list[list] | None:
+        '''
+        Получить пары: step_id - score, для студента
+        '''
+        grades = self.get_student_grades(student_id)
+        if (grades is None):
+            return None
+        score = []
+        for results_id, results in grades.items():
+            score.append([results["step_id"], results["score"]])
+        return score

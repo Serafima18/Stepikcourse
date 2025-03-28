@@ -41,7 +41,7 @@
 
 <b> Пример: </b>\
 Запрос: 
-**https://stepik.org/api/users?ids\%5B\%5D=944335224&ids%5B%5D=496655886**\
+**https://stepik.org/api/users?ids\%5B\%5D=944335224&ids%5B%5D=496655886**
 Ответ на него:
 ``` json
 {
@@ -115,7 +115,7 @@
 ```
 
 <b> Пример: </b>\
-Запрос: **https://stepik.org/api/course-grades?course=188376&is_teacher=false&klass=62475&order=-score%2C-id&page=1&search=**\
+Запрос: **https://stepik.org/api/course-grades?course=188376&is_teacher=false&klass=62475&order=-score%2C-id&page=1&search=**
 Ответ на него
 ``` json
 {
@@ -202,7 +202,7 @@
 
 <b> Пример: </b>\
 Запрос:
-**https://stepik.org/api/steps?ids%5B%5D=4818237**\
+**https://stepik.org/api/steps?ids%5B%5D=4818237**
 Ответ на него
 ``` json
 {
@@ -316,7 +316,7 @@
 ```
 
 <b> Пример: </b>\
-Запрос: **https://stepik.org/api/lessons?ids%5B%5D=1140055**\
+Запрос: **https://stepik.org/api/lessons?ids%5B%5D=1140055**
 Ответ на него
 ``` json
 {
@@ -427,7 +427,7 @@
 ```
 
 <b> Пример: </b>\
-Запрос: **https://stepik.org/api/sections?ids%5B%5D=365062**\
+Запрос: **https://stepik.org/api/sections?ids%5B%5D=365062**
 Ответ на него
 ``` json
 {
@@ -492,7 +492,7 @@
 
 В json-формате мы получим словарь, в котором по ключу "units" хранится список словарей. Вид хранимого словаря:
 ``` json
-* {
+{
     "id": int,
     "section": int - на примере(в документации str), - id модуля, которому принадлежит юнит
     "lesson": int - на примере(в документации str), - урок, с которым связан юнит
@@ -517,7 +517,7 @@
 ```
 
 <b> Пример: </b>\
-Запрос: **https://stepik.org/api/units?ids%5B%5D=1151731**\
+Запрос: **https://stepik.org/api/units?ids%5B%5D=1151731**
 Ответ на него
 ``` json
 {
@@ -570,7 +570,7 @@
 
 В json-формате мы получим словарь, в котором по ключу "courses" хранится список словарей. Вид хранимого словаря:
 ``` json
-* {
+{
     "id": int,
     "summary",
     "workload",
@@ -709,7 +709,7 @@
 ```
 
 <b> Пример: </b>\
-Запрос: **https://stepik.org/api/courses/188376**\
+Запрос: **https://stepik.org/api/courses/188376**
 Ответ на него
 ``` json
 {
@@ -965,7 +965,7 @@
 ```
 
 <b> Пример: </b>\
-Запрос: **https://stepik.org/api/classes/62475**\
+Запрос: **https://stepik.org/api/classes/62475**
 Ответ на него
 ``` json
 {
@@ -1014,7 +1014,7 @@
 ```
 
 <b> Пример: </b>\
-Запрос: **https://stepik.org/api/students?klass=62475&page=1**\
+Запрос: **https://stepik.org/api/students?klass=62475&page=1**
 Ответ на него
 ``` json
 {
@@ -1059,7 +1059,7 @@
 ```
 
 <b> Пример: </b>\
-Запрос: **https://stepik.org/api/students?klass=62475&page=1**\
+Запрос: **https://stepik.org/api/submissions?klass=62475&order=desc&page=1&step=4584301**
 Ответ на него
 ``` json
 {
