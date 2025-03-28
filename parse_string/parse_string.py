@@ -21,8 +21,7 @@ def parse_str(self):
         "answer": [],
     }
 
-    letters = "абвгдежзийклмнопрстуфхцчшщъыьэюя ',-.!?()[]{}\""
-    parse_answer = pp.Suppress("ANSWER:") + pp.Word(pp.alphas + pp.nums + letters + letters.upper())
+    parse_answer = pp.Suppress("ANSWER:") + pp.SkipTo(pp.LineEnd())
 
     for line in lines:
         line = line.strip()
