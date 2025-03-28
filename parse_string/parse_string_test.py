@@ -7,7 +7,7 @@ def test_parsing():
     assert step_test.parse_step() == ans
 
 
-def test_parsing_string():
+def test_parsing_string1():
     text = \
 '''
 Какой ваш любимый цвет?
@@ -18,3 +18,16 @@ ANSWER: Красный
     step_test.parse_step()
     assert step_test.question == "Какой ваш любимый цвет?"
     assert step_test.answer == ["синий", "красный"]
+
+
+def test_parsing_string2():
+    text = \
+'''
+Попросим студента написать "MIPT". Напишите "MIPT".
+
+ANSWER: MIPT
+'''
+    step_test = StepString(1, "Хочу задать вопрос", text)
+    step_test.parse_step()
+    assert step_test.question == 'Попросим студента написать "MIPT". Напишите "MIPT".'
+    assert step_test.answer == ["mipt"]
