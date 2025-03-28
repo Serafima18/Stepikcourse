@@ -1,3 +1,6 @@
+import pyparsing as pp
+
+
 class Step:
     """
     Базовый класс для всех шагов.
@@ -23,6 +26,9 @@ class Step:
         Проверяет, что все необходимые атрибуты были заданны.
         """
         raise NotImplementedError("Subclasses should implement this!")
+
+    def parse_step(self):
+        return {"data": ""}
 
 
 class StepText(Step):
@@ -113,3 +119,35 @@ class StepString(Step):
             raise ValueError("Answer must not be empty.")
         if self.regexp and not isinstance(self.regexp, str):
             raise ValueError("Regexp must be a string if provided.")
+
+    def get_txt(self):
+        txt = self.question
+        for ans in self.answer:
+            txt += '\nANSWER: ' + ans
+        return txt
+
+    def parse_step(self):
+        text = self.get_txt()
+        lines = [line for line in text.splitlines()]
+        results = {
+            "question": "",
+            "answer": [],
+        }
+
+        parse_answer = pp.Suppress("ANSWER:") + pp.SkipTo(pp.LineEnd())
+
+        for line in lines:
+            line = line.strip()
+
+            if not line:
+                continue
+
+            if not results["answer"]:
+                if not parse_answer.matches(line):
+                    results["question"] += line
+
+            if parse_answer.matches(line):
+                answer_result = parse_answer.parseString(line)
+                results["answer"].append(" ".join(answer_result).strip().lower())
+
+        return results

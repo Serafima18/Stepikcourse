@@ -1,7 +1,4 @@
-import parse_string as ps
 from step_classes import Step, StepString
-
-ps.add_methods()
 
 
 def test_parsing():
