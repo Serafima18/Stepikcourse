@@ -91,10 +91,12 @@ class StepString(Step):
     """
     Класс для строковых задач, требующих текстовых ответов.
     """
-    def __init__(self, step_id, title, question, answer, regexp=None):
+    # def __init__(self, step_id, title, question, answer, regexp=None):
+    def __init__(self, step_id, title, text, regexp=None):
         super().__init__(step_id, title)
-        self.question = question   # Вопрос для задачи
-        self.answer = answer       # Правильный ответ
+        self.text = text
+        self.question = ""   # Вопрос для задачи
+        self.answer = []      # Правильный ответ
         self.regexp = regexp       # Регулярное выражение для проверки ответа
 
     def to_json(self):
@@ -120,20 +122,8 @@ class StepString(Step):
         if self.regexp and not isinstance(self.regexp, str):
             raise ValueError("Regexp must be a string if provided.")
 
-    def get_txt(self):
-        txt = self.question
-        for ans in self.answer:
-            txt += '\nANSWER: ' + ans
-        return txt
-
     def parse_step(self):
-        text = self.get_txt()
-        lines = [line for line in text.splitlines()]
-        results = {
-            "question": "",
-            "answer": [],
-        }
-
+        lines = [line for line in self.text.splitlines()]
         parse_answer = pp.Suppress("ANSWER:") + pp.SkipTo(pp.LineEnd())
 
         for line in lines:
@@ -142,12 +132,10 @@ class StepString(Step):
             if not line:
                 continue
 
-            if not results["answer"]:
+            if not self.answer:
                 if not parse_answer.matches(line):
-                    results["question"] += line
+                    self.question += line
 
             if parse_answer.matches(line):
                 answer_result = parse_answer.parseString(line)
-                results["answer"].append(" ".join(answer_result).strip().lower())
-
-        return results
+                self.answer.append(" ".join(answer_result).strip().lower())

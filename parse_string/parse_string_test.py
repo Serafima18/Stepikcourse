@@ -8,6 +8,13 @@ def test_parsing():
 
 
 def test_parsing_string():
-    step_test = StepString(1, "Хочу задать вопрос", "Какой ваш любимый цвет?", ["Синий", "Красный"])
-    right_ans = {"question": "Какой ваш любимый цвет?", "answer": ["синий", "красный"]}
-    assert right_ans == step_test.parse_step()
+    text = \
+'''
+Какой ваш любимый цвет?
+ANSWER: Синий
+ANSWER: Красный
+'''
+    step_test = StepString(1, "Хочу задать вопрос", text)
+    step_test.parse_step()
+    assert step_test.question == "Какой ваш любимый цвет?"
+    assert step_test.answer == ["синий", "красный"]
