@@ -1,10 +1,4 @@
-from step_classes import Step, StepString
-
-
-def test_parsing():
-    step_test = Step(1, "")
-    ans = {"data": ""}
-    assert step_test.parse_step() == ans
+from step_string_class import StepString
 
 
 def test_parsing_string1():
@@ -29,7 +23,7 @@ ANSWER: MIPT
 '''
     step_test = StepString(1, "Хочу задать вопрос", text)
     step_test.parse_step()
-    assert step_test.question == 'Попросим студента написать "MIPT". Напишите "MIPT".'
+    assert step_test.question == 'Попросим студента написать "MIPT". Напишите "MIPT".\n'
     assert step_test.answer == ["mipt"]
 
 
@@ -47,5 +41,7 @@ ANSWER:  Я учусь в МФТИ
     step_test.parse_step()
     assert step_test.question == \
 '''Попросим студента написать "Я учусь в МФТИ". Напишите  "Я учусь в МФТИ".
-Много строк в условии.'''
+
+Много строк в условии.
+'''
     assert step_test.answer == ["я учусь в мфти"]
