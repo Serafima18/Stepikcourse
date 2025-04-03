@@ -24,8 +24,18 @@ class Step:
         """
         raise NotImplementedError("Subclasses should implement this!")
 
-    def parse_step(self):
-        pass
+    @classmethod
+    def parse(cls, text, step_type=None):
+        from step_string_class import StepString
+        if step_type not in ['TEXT', 'STRING', 'NUMBER']:
+            raise NotImplemented("Incorrect step type")
+        match step_type:
+            case 'TEXT':
+                return StepText.parse(text)
+            case 'STRING':
+                return StepString.parse(text)
+            case 'NUMBER':
+                return StepNumber.parse(text)
 
 
 class StepText(Step):
