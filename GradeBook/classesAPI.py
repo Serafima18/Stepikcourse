@@ -1,255 +1,260 @@
-# Run with Python 3
-# Clone course from one Stepik instance (domain) into another
-import csv
+# import csv
 import requests
-from config import token
+from typing import List, Dict
+from requests.exceptions import RequestException, JSONDecodeError
 
 
-class StepikAPI:
-    __api_host = 'https://stepik.org'
-    
-    def __init__(self, token: str, course_id: int) -> None:
+class StepikAPIClient:
+    """Базовый класс для работы с Stepik API."""
+    API_HOST = 'https://stepik.org'
+
+    def __init__(self, token: str):
         self.token = token
-        self.course_id = course_id
-        self.data = None
+        self.session = requests.Session()
+        self.session.headers.update({'Authorization': f'Bearer {self.token}'})
 
-    # 3. Call API (https://stepik.org/api/docs/) using this token.
-    def __fetch_object(self, obj_class, obj_id):
-        api_url = f'{self.__api_host}/api/{obj_class}s/{obj_id}'
-        response = requests.get(api_url,
-                                headers={'Authorization': 'Bearer ' + token})
-        if not response.ok:
-            raise RuntimeError("__fetch_object") 
-        response_json = response.json()
-        return response_json[f'{obj_class}s'][0]
+    def _fetch_object(self, obj_class: str, obj_id: int) -> Dict:
+        """Получить один объект по ID."""
+        url = f'{self.API_HOST}/api/{obj_class}s/{obj_id}'
+        try:
+            response = self.session.get(url)
+            response.raise_for_status()
+            return response.json()[f'{obj_class}s'][0]
+        except (RequestException, JSONDecodeError) as e:
+            print(f"Error fetching {obj_class}: {e}")
+            return []
 
-
-    def __fetch_objects(self, obj_class, obj_ids):
-        objs = []
-        # Fetch objects by 30 items,
-        # so we won't bump into HTTP request length limits
+    def _fetch_objects(self, obj_class: str, obj_ids: List[int]) -> List[Dict]:
+        """Получить несколько объектов по списку ID."""
+        objects = []
         step_size = 30
+
         for i in range(0, len(obj_ids), step_size):
-            obj_ids_slice = obj_ids[i:i + step_size]
-            api_url = f'{self.__api_host}/api/{obj_class}s?{'&'.join(f'ids[]={obj_id}'
-                                                      for obj_id in obj_ids_slice)}'
-            response = requests.get(api_url,
-                                    headers={'Authorization': 'Bearer ' + token}
-                                    )
-            response_json = response.json()
-            if not response.ok:
-                raise RuntimeError("__fetch_objects")
-            objs += response_json[f'{obj_class}s']
-        return objs
-    
-    def __fetch_data(self):
-        '''
-        Запрос на все данные о курсе
-        '''
-        course = self.__fetch_object('course', self.course_id)
-        sections = self.__fetch_objects('section', course['sections'])
+            chunk = obj_ids[i:i + step_size]
+            url = (
+                f'{self.API_HOST}/api/{obj_class}s'
+                f'?ids[]={"&ids[]=".join(map(str, chunk))}'
+            )
+            try:
+                response = self.session.get(url)
+                response.raise_for_status()
+                objects.extend(response.json()[f'{obj_class}s'])
+            except (RequestException, JSONDecodeError) as e:
+                print(f"Error fetching {obj_class}s: {e}")
+                return []
+
+        return objects
+
+
+class CourseData(StepikAPIClient):
+    """Класс для экспорта данных курса."""
+    def __init__(self, token: str, course_id: int):
+        super().__init__(token)
+        self.course_id = course_id
+        self._data = None
+        self._sections = None
+        self._lessons = None
+        self._steps = None
+
+    @property
+    def data(self) -> List[Dict]:
+        """Получить данные курса"""
+        if self._data is None:
+            self._load_course_data()
+        return {
+            'course': self._data,
+            'sections': self._sections,
+            'lessons': self._lessons,
+            'steps': self._steps
+        }
+
+    def _load_course_data(self) -> None:
+        course = self._fetch_object('course', self.course_id)
+        sections = self._fetch_objects('section', course['sections'])
+        units = self._fetch_units(sections)
+        #  Словарь из пар {unit_id: lesson_id} для их быстрого сопоставления
+        units_dict = {unit['id']: unit['lesson'] for unit in units}
+        lessons = self._fetch_lessons(units)
+        steps = self._fetch_steps(lessons)
+
+        self._data = self._process_course(course)
+        self._data.update({'sections': [section['id'] for section in sections]})
+
+        self._sections = {
+            section['id']: self._process_section(section, units_dict)
+            for section in sections
+        }
+
+        self._lessons = {
+            lesson['id']: self._process_lesson(lesson) for lesson in lessons
+        }
+
+        self._steps = {
+            step['id']: self._process_step(step) for step in steps
+        }
+
+    def _fetch_units(self, sections: List[Dict]) -> List[Dict]:
+        """Получаем данные юнитов"""
         unit_ids = [unit for section in sections for unit in section['units']]
+        return self._fetch_objects('unit', unit_ids)
 
-        units = self.__fetch_objects('unit', unit_ids)
-        lessons_ids = [unit['lesson'] for unit in units]
+    def _fetch_lessons(self, units: List[Dict]) -> List[Dict]:
+        """Получаем данные уроков"""
+        lesson_ids = [u['lesson'] for u in units]
+        return self._fetch_objects('lesson', lesson_ids)
 
-        lessons = self.__fetch_objects('lesson', lessons_ids)
+    def _fetch_steps(self, lessons: List[Dict]) -> List[Dict]:
+        """Получаем данные шагов"""
         step_ids = [step for lesson in lessons for step in lesson['steps']]
+        return self._fetch_objects('step', step_ids)
 
-        steps = self.__fetch_objects('step', step_ids)
+    @staticmethod
+    def _process_course(course: Dict) -> Dict:
+        keys = ['id', 'title']
+        return {k: course[k] for k in keys}
 
-        data = []
-        idd = course['id']
-        course = { key: course[key] for key in ['title', 'summary', 'course_format', 'language', 'requirements', 'workload', 'is_public', 'description', 'certificate', 'target_audience'] }
-        row = ['course', idd, course]
-        data.append(row)
+    @staticmethod
+    def _process_section(section: Dict, units_dict: Dict) -> Dict:
+        return {
+            'id': section['id'],
+            'title': section['title'],
+            'position': section['position'],
+            'course_id': section['course'],
+            'lessons': [units_dict[unit] for unit in section['units']]
+        }
 
-        for section in sections:
-            idd = section['id']
-            section = { key: section[key] for key in ['title', 'position', 'course'] }
-            row = ['section', idd, section]
-            data.append(row)
-        for unit in units:
-            idd = unit['id']
-            unit = { key: unit[key] for key in ['position', 'section', 'lesson'] }
-            row = ['unit', idd, unit]
-            data.append(row)
-        for lesson in lessons:
-            idd = lesson['id']
-            lesson = { key: lesson[key] for key in ['title', 'is_public', 'language'] }
-            row = ['lesson', idd, lesson]
-            data.append(row)
-        for step in steps:
-            idd = step['id']
-            step_data = {
-            'lesson': step['lesson'],
+    @staticmethod
+    def _process_unit(unit: Dict) -> Dict:
+        return {
+            'id': unit['id'],
+            'position': unit['position'],
+            'section_id': unit['section'],
+            'lesson_id': unit['lesson']
+        }
+
+    @staticmethod
+    def _process_lesson(lesson: Dict) -> Dict:
+        return {
+            'id': lesson['id'],
+            'title': lesson['title'],
+            'steps': lesson['steps']
+        }
+
+    @staticmethod
+    def _process_step(step: Dict) -> Dict:
+        return {
+            'id': step['id'],
+            'lesson_id': step['lesson'],
             'position': step['position'],
-            'block_name': step['block']['name']  # Извлекаем только имя из блока
-            }
-            row = ['step', idd, step_data]
-            data.append(row)
+            'block_type': step['block']['name']
+        }
 
-        self.data = data
-        return data
-    
-    def get_data(self):
-        if self.data is None:
-            self.__fetch_data()
-        return self.data
-    
-    def get_sections(self):
-        self.get_data()
-        sections = [i for i in self.data if i[0] == 'section']
-        return sections
-    
-    def get_lessons(self):
-        self.get_data()
-        lessons = [i for i in self.data if i[0] == 'lesson']
-        return lessons
-    
-    def get_units(self):
-        self.get_data()
-        units = [i for i in self.data if i[0] == 'unit']
-        return units
-    
-    def get_steps(self):
-        self.get_data()
-        steps = [i for i in self.data if i[0] == 'step']
-        return steps
-    
-    def save_to_csv(self):
-        # write data to file
-        csv_file = open(f'course-{self.course_id}-dump.csv', 'w', encoding='utf-8')
-        csv_writer = csv.writer(csv_file)
-        csv_writer.writerows(self.data)
-        csv_file.close()
+    # def export_to_csv(self, filename: str = None) -> None:
+    #     if not filename:
+    #         filename = f'course_{self.course_id}_dump.csv'
 
-class Students:
-    '''
-    Класс для работы с учениками класса
-    '''
-    def __init__(self, token: str, class_id: str) -> None:
-        self.token = token
+    #     with open(filename, 'w', newline='', encoding='utf-8') as f:
+    #         writer = csv.writer(f)
+    #         writer.writerow(['Type', 'ID', 'Data'])
+
+    #         for obj_type in ['course', 'sections', 'units', 'lessons', 'steps']:
+    #             for item in self._data[obj_type]:
+    #                 writer.writerow([obj_type[:-1] if obj_type.endswith('s') else obj_type,
+    #                                 item['id'], str(item)])
+
+
+class Students(StepikAPIClient):
+    def __init__(self, token: str, class_id: int):
+        super().__init__(token)
         self.class_id = class_id
-        self.__response = None
 
-    def __fetch(self) -> None:
-        if (self.__response is not None):
-            return
-        url = "https://stepik.org/api/students?klass=" + str(self.class_id) + "&page=1"
-        headers = {
-            'Authorization': f'Bearer {self.token}',
-            'Content-Type': 'application/json'
+    def get_students(self) -> List[int]:
+        """Получаем список id всех студентов класса"""
+        url = f"{self.API_HOST}/api/students"
+        params = {'klass': self.class_id, 'page': 1}
+
+        try:
+            response = self.session.get(url, params=params)
+            response.raise_for_status()
+            return [s['user'] for s in response.json()['students']]
+        except (RequestException, JSONDecodeError, KeyError) as e:
+            print(f"Error fetching students: {e}")
+            return []
+
+
+class User(StepikAPIClient):
+    def get_users_info(self, user_ids: List[int]) -> Dict[int, str]:
+        """Получаем пары {id: full_name}"""
+        if not user_ids:
+            return {}
+
+        users = self._fetch_objects('user', user_ids)
+        return {u['id']: u['full_name'] for u in users}
+
+
+class GradeBook(StepikAPIClient):
+    def __init__(self, token: str, course_id: int, class_id: int):
+        super().__init__(token)
+        self.course_id = course_id
+        self.class_id = class_id
+
+    def get_grades(self) -> List[Dict]:
+        """Получаем все оценки по классу"""
+        url = f"{self.API_HOST}/api/course-grades"
+        params = {
+            'course': self.course_id,
+            'klass': self.class_id,
+            'order': '-score,-id',
+            'page': 1
         }
-        self.__response = requests.get(url, headers=headers)
-        if self.__response.ok:
-            self.__response = self.__response.json()
-        else:
-            self.__response = None
 
-    def get_students_id(self) -> str | None:
-        '''
-        Получить имя пользователя
-        '''
-        self.__fetch()
-        students = self.__response
-        if (students is None):
-            return None
-        id = []
-        for i in students['students']:
-            id.append(i['user'])
-        return id
+        try:
+            response = self.session.get(url, params=params)
+            response.raise_for_status()
+            return response.json()['course-grades']
+        except (RequestException, JSONDecodeError) as e:
+            print(f"Error fetching grades: {e}")
+            return []
 
-class User:
-    '''
-    Класс для работы с пользователями
-    '''
-    def __init__(self, token: str, user_id: str) -> None:
-        self.token = token
-        self.user_id = user_id
-        self.__response = None
+    def get_student_grades(self, student_id: int) -> Dict[int, float]:
+        """Получаем оценки студента по id"""
+        grades = self.get_grades()
+        for student_grade in grades:
+            if student_grade['user'] == student_id:
+                return {
+                    int(grade['step_id']): grade['score']
+                    for _, grade in student_grade['results'].items()
+                }
+        return {}
 
-    def __fetch(self) -> None:
-        if (self.__response is not None):
-            return
-        url = "https://stepik.org/api/users?ids%5B%5D=" + self.user_id
-        headers = {
-            'Authorization': f'Bearer {self.token}',
-            'Content-Type': 'application/json'
+
+class Parcels(StepikAPIClient):
+    """Класс для работы с посылками"""
+    def __init__(self, token: str, class_id: int):
+        super().__init__(token)
+        self.class_id = class_id
+
+    def get_parcels(self, step_id: int, student_id: int):
+        """Получаем все посылки по шагу и студенту"""
+        url = f"{self.API_HOST}/api/submissions"
+        params = {
+            'klass': self.class_id,
+            'step': step_id,
+            'order': 'desc',
+            'page': 1
         }
-        self.__response = requests.get(url, headers=headers)
-        if self.__response.ok:
-            self.__response = self.__response.json()
-        else:
-            self.__response = None
-
-
-    def get_user_name(self) -> str | None:
-        '''
-        Получить имя пользователя
-        '''
-        self.__fetch()
-        user = self.__response
-        if (user is None):
-            return None
-        return user['users'][0]['full_name']
-
-class GradeBook:
-    '''
-    Работа с табелем успеваемости
-    '''
-    def __init__(self, token: str, course: str, klass: str) -> None:
-        self.token = token
-        self.course = course
-        self.klass = klass
-        self.response = None
-
-    def __fetch(self) -> None:
-        if (self.response is not None):
-            return
-        url = ("https://stepik.org/api/course-grades?course=" + self.course +
-               "&is_teacher=false&klass=" + self.klass +
-               "&order=-score%2C-id&page=1&search=")
-        headers = {
-            'Authorization': f'Bearer {self.token}',
-            'Content-Type': 'application/json'
+        params = {
+            'klass': self.class_id,
+            'step': step_id,
+            'page': 1,
+            'order': 'desc',
+            'search': f'id:{student_id}'
         }
-        self.response = requests.get(url, headers=headers)
-        if self.response.ok:
-            self.response = self.response.json()
-        else:
-            self.response = None
 
-    def get_all_grades(self) -> list[dict]:
-        '''
-        Получить все оценки всех студентов
-        '''
-        self.__fetch()
-        if self.response is None:
-            return None
-        else:
-            return self.response['course-grades']
-
-    def get_student_grades(self, student_id: str) -> dict | None:
-        '''
-        Получить все оценки для студента
-        '''
-        all_grades = self.get_all_grades()
-        if (all_grades is None):
-            return None
-        for i in all_grades:
-            if (i['user'] == int(student_id)):
-                return i['results']
-        return dict()
-
-    def get_student_score(self, student_id: int) -> list[list] | None:
-        '''
-        Получить пары: step_id - score, для студента
-        '''
-        grades = self.get_student_grades(student_id)
-        if (grades is None):
-            return None
-        score = []
-        for results_id, results in grades.items():
-            score.append([results["step_id"], results["score"]])
-        return score
+        try:
+            response = self.session.get(url, params=params)
+            response.raise_for_status()
+            return response.json()['submissions']
+        except (RequestException, JSONDecodeError) as e:
+            print(f"Error fetching parcels: {e}")
+            return []

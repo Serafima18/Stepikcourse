@@ -1037,11 +1037,12 @@
 ### Работа с информацией о посылках
 
 Получить информацию о посылках для какого-то шага из класса можно с помощью этого https-запроса:
-**https://stepik.org/api/submissions?klass=class_id&order=desc&page=1&step=step_id**
+**https://stepik.org/api/submissions?klass=class_id&order=desc&page=1&search=id%3Auser_id&step=step_id**
 > Вместо **class_id** нужно подставить id класса\
 Вместо **step_id** нужно подставить id шага
+Вместо **user_id** нужно подставить id user
 
-В json-формате мы получим словарь, в котором по ключу "students" хранится список словарей. Вид хранимого словаря:
+В json-формате мы получим словарь, в котором по ключу "submissions" хранится список словарей. Вид хранимого словаря:
 ``` json
 {
     "id": int,
@@ -1059,7 +1060,7 @@
 ```
 
 <b> Пример: </b>\
-Запрос: **https://stepik.org/api/submissions?klass=62475&order=desc&page=1&step=4584301**
+Запрос: **https://stepik.org/api/submissions?klass=62475&order=desc&page=1&search=id%3A941560677&step=4818239**
 Ответ на него
 ``` json
 {
@@ -1070,18 +1071,22 @@
     },
     "submissions": [
         {
-            "id": 1277353101,
+            "id": 1272300860,
             "status": "correct",
             "score": 1.0,
             "hint": "",
             "feedback": "",
-            "time": "2024-09-16T05:43:37Z",
+            "time": "2024-09-08T14:32:26Z",
             "reply": {
-                "code": "class Gun:\n    pass\ntt = Gun()\nrevolver = Gun()\n\n\n\n\n",
-                "language": "python3.10"
+                "choices": [
+                    false,
+                    false,
+                    false,
+                    true
+                ]
             },
             "reply_url": null,
-            "attempt": 1192236951,
+            "attempt": 1187302411,
             "session": null,
             "eta": 0
         }
