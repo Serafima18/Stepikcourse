@@ -24,6 +24,19 @@ class Step:
         """
         raise NotImplementedError("Subclasses should implement this!")
 
+    @classmethod
+    def parse(cls, text, step_type=None):
+        from step_string_class import StepString
+        if step_type not in ['TEXT', 'STRING', 'NUMBER']:
+            raise NotImplemented("Incorrect step type")
+        match step_type:
+            case 'TEXT':
+                return StepText.parse(text)
+            case 'STRING':
+                return StepString.parse(text)
+            case 'NUMBER':
+                return StepNumber.parse(text)
+
 
 class StepText(Step):
     """
@@ -79,37 +92,3 @@ class StepNumber(Step):
             raise ValueError("Answer must not be None.")
         if self.tolerance < 0:
             raise ValueError("Tolerance must not be negative.")
-
-
-class StepString(Step):
-    """
-    Класс для строковых задач, требующих текстовых ответов.
-    """
-    def __init__(self, step_id, title, question, answer, regexp=None):
-        super().__init__(step_id, title)
-        self.question = question   # Вопрос для задачи
-        self.answer = answer       # Правильный ответ
-        self.regexp = regexp       # Регулярное выражение для проверки ответа
-
-    def to_json(self):
-        result = {
-            "id": self.step_id,
-            "title": self.title,
-            "type": "string",
-            "question": self.question,
-            "answer": self.answer
-        }
-        if self.regexp:
-            result["regexp"] = self.regexp  # Добавляем регулярное выражение, если есть
-        return result
-
-    def validate(self):
-        """
-        Проверяет, что все необходимые атрибуты заданы корректно.
-        """
-        if not self.question:
-            raise ValueError("Question must not be empty.")
-        if not self.answer:
-            raise ValueError("Answer must not be empty.")
-        if self.regexp and not isinstance(self.regexp, str):
-            raise ValueError("Regexp must be a string if provided.")
