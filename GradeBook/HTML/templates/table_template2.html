@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<style>
+  table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+  }
+  th, td {
+    padding: 5px;
+    text-align: left;
+  }
+</style>
+
+<h2>Базовая HTML таблица</h2>
+
+<table style="width:20%">
+  <tr>
+    <th colspan="2" >{{ "Ученики" }}</th>
+    <th colspan="{{ data.steps_count }}" style="text-align: center;">{{ data.lesson_name }}</th>
+  </tr>
+
+  <tr>
+    <td></td>
+    <td></td>
+    {% for step in steps %}
+      <td>{{ step }}</td>
+    {% endfor %}
+  </tr>
+  
+  {% for student_id in students %}
+  <tr>
+    <td>{{ student_id }}</td>
+    <td>{{ students[student_id] }}</td>
+    {% for step in steps  %}
+      <td>{{ grades[student_id][step] }}</td>
+    {% endfor %}   
+  </tr>
+  {% endfor %}
+</table>
+
+</body>
+</html>
