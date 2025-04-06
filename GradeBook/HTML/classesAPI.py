@@ -215,6 +215,18 @@ class GradeBook(StepikAPIClient):
         except (RequestException, JSONDecodeError) as e:
             print(f"Error fetching grades: {e}")
             return []
+        
+    def get_grades_pair(self) -> List[Dict]:
+        """Получаем все оценки по классу в виде {stedent_id: [{"score": ..., "step": ...}]}"""
+        grades = self.get_grades()
+        d = dict()
+        for student_grade in grades:
+            d[student_grade['user']] = {
+                    int(grade['step_id']): grade['score']
+                    for _, grade in student_grade['results'].items()
+                }
+        return d
+
 
     def get_student_grades(self, student_id: int) -> Dict[int, float]:
         """Получаем оценки студента по id"""
