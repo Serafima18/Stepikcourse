@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<style>
+  table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+  }
+  th, td {
+    padding: 5px;
+    text-align: left;
+  }
+</style>
+
+<h2>Табель успеваемости</h2>
+
+{% set sections = data.sections %}
+{% set lessons = data.lessons %}
+
+{% include 'module_template.html' %}
+
+</body>
+</html>
