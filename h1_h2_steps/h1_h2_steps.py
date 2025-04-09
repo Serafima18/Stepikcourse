@@ -1,7 +1,7 @@
 import pyparsing as pp
 
 # h1
-parse_h1 = pp.Keyword('#') + pp.White() + (pp.restOfLine()) ('lesson_title')
+parse_h1 = pp.AtLineStart(pp.Keyword('#')) + pp.White() + (pp.restOfLine()) ('lesson_title')
 
 # lesson_id
 lesson_id_key = pp.Suppress('lesson_id' + pp.Optional(pp.White()) + ':')
@@ -27,20 +27,43 @@ parse_h2 = pp.AtLineStart(h2_start) + pp.Optional(skip) + pp.Optional(task_type,
 
 
 def parse_text(text):
-    lines = [line for line in text.splitlines() if line.strip() != '']
+    lines = [line for line in text.splitlines()]
     results = []
-
-    lesson_title_result = parse_h1.parseString(lines[0])
-    lesson_id_result = parse_lesson_id.parseString(lines[1])
-    lang_result = parse_lang.parseString(lines[2])
-
-    results.append({'lesson_title': lesson_title_result.lesson_title})
-    results.append({'lesson_id': lesson_id_result.lesson_id, 'lang': lang_result.lang})
-
+    
     current_h2 = None
     current_text = []
 
-    for line in lines[3:]:
+    for line in lines:
+        if parse_h1.matches(line):
+            lesson_title_result = parse_h1.parseString(line)
+            results.append({'lesson_title': lesson_title_result.lesson_title})
+
+            continue
+
+        elif len(results) < 0:
+            continue
+
+
+        if parse_lesson_id.matches(line):
+            lesson_id_result = parse_lesson_id.parseString(line)
+            results.append({'lesson_id': lesson_id_result.lesson_id})
+            
+            continue
+
+        elif len(results) < 1:
+            continue
+
+
+        if parse_lang.matches(line):
+            lang_result = parse_lang.parseString(line)
+            results.append({'lang': lang_result.lang})
+            
+            continue
+
+        elif len(results) < 2:
+            continue
+
+
         if parse_h2.matches(line):
             h2_current = parse_h2.parseString(line)
             if current_h2:
@@ -50,7 +73,7 @@ def parse_text(text):
             current_h2 = {'type': h2_current.type,
                           'skip': 'True' if h2_current.skip else 'False', 
                           'header': h2_current.header}
-        else:
+        elif current_h2:
             current_text.append(line)
 
     if current_h2:
