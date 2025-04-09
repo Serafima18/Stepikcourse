@@ -11,6 +11,7 @@ class StepString(Step):
     def parse(text):  # этот метод работает как надо, но он не взаимодействует с полями класса
         question = ""
         answer = []
+
         lines = [line for line in text.splitlines()]
         parse_answer = pp.Suppress("ANSWER:") + pp.SkipTo(pp.LineEnd())
 
@@ -25,14 +26,14 @@ class StepString(Step):
 
             if parse_answer.matches(line):
                 answer_result = parse_answer.parseString(line)
-                answer.append(" ".join(answer_result).strip().lower())
+                answer.append(answer_result[0].strip().lower())
 
         return question, answer
 
     def __init__(self, step_id, title, regexp=None):
         super().__init__(step_id, title)
-        self.question = ""   # Вопрос для задачи
-        self.answer = []      # Правильный ответ
+        self.question = ''
+        self.answer = []
         self.regexp = regexp       # Регулярное выражение для проверки ответа
 
     def to_json(self):

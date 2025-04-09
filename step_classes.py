@@ -26,8 +26,9 @@ class Step:
 
     @classmethod
     def parse(cls, text, step_type=None):
-        from step_string_class import StepString
-        if step_type not in ['TEXT', 'STRING', 'NUMBER']:
+        from parse_STRING.step_string_class import StepString
+        from parse_QUIZ.step_quiz_class import StepQuiz
+        if step_type not in ['TEXT', 'STRING', 'NUMBER', 'QUIZ']:
             raise NotImplemented("Incorrect step type")
         match step_type:
             case 'TEXT':
@@ -36,6 +37,8 @@ class Step:
                 return StepString.parse(text)
             case 'NUMBER':
                 return StepNumber.parse(text)
+            case 'QUIZ':
+                return StepQuiz.parse(text)
 
 
 class StepText(Step):
