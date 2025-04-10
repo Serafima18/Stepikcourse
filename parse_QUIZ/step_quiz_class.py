@@ -19,8 +19,6 @@ class StepQuiz(Step):
         flag = ''
 
         for line in lines:
-            line = line.strip()
-
             if not answer and not possible_answers and flag != 'TEXTEND':
                 if line.strip() == 'TEXTBEGIN':
                     flag = 'TEXTBEGIN'
@@ -28,6 +26,7 @@ class StepQuiz(Step):
 
                 if line.strip() == 'TEXTEND':
                     flag = 'TEXTEND'
+                    question += '\n'
                     continue
 
                 if not parse_poss_ans.matches(line.lstrip()) or flag == 'TEXTBEGIN':
@@ -51,7 +50,10 @@ class StepQuiz(Step):
 
             if parse_answer.matches(line):
                 answer_res = parse_answer.parseString(line)
-                answer.append(answer_res[0].strip().split(', '))
+                answer.append(answer_res[0].strip().split(','))
+
+        for i in range(len(answer[0])):
+            answer[0][i] = answer[0][i].strip()
 
         return question, possible_answers, shuffle, answer
 
