@@ -1,31 +1,40 @@
 import requests
+import json
 
-from config import client_id, client_secret
 
-# Enter parameters below:
-# 1. Get your keys at https://stepik.org/oauth2/applications/
-# (client type = confidential, authorization grant type = client credentials)
+class InvalidToken(Exception):
+    pass
 
-api_host = 'https://stepik.org'
 
-# client_id = '...'
-# client_secret = '...'
-# api_host = 'http://127.0.0.1' # save to localhost 
+def get_token(client_id: str, client_secret: str) -> str:
+    """Получить токен доступа через секретки"""
+    # 2. Get a token
+    api_host = 'https://stepik.org'
+    auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
+    response = requests.post(
+                        f'{api_host}/oauth2/token/',
+                        data={'grant_type': 'client_credentials'},
+                        auth=auth
+                        )
+    token = response.json().get('access_token', None)
 
-course_id = 401
-mode = 'SAVE' # IMPORTANT: use SAVE first, then use PASTE with uncommented (or changed) lines above (client keys and host)
+    if not token:
+        raise InvalidToken(
+                'Невозможно авторизоваться с предоставленными учетными данными'
+                )
 
-cross_domain = True # to re-upload videos
+    return token
 
-# 2. Get a token
-auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
-response = requests.post(f'{api_host}/oauth2/token/',
-                         data={'grant_type': 'client_credentials'},
-                         auth=auth)
-token = response.json().get('access_token', None)
 
-if not token:
-    print('Unable to authorize with provided credentials')
-    exit(1)
+if __name__ == '__main__':
+    with open('./StepicAPI/config.json', 'r') as file:
+        data = json.load(file)
 
-print(f'Token: {token}')
+    client_id = data["client_id"]
+    client_secret = data["client_secret"]
+
+    try:
+        token = get_token(client_id, client_secret)
+        print(f'Token: {token}')
+    except InvalidToken as e:
+        print(e)
