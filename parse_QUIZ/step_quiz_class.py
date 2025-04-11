@@ -12,9 +12,9 @@ class StepQuiz(Step):
 
         lines = [line for line in text.splitlines()]
 
-        parse_poss_ans = pp.Word(pp.alphas, exact=1) + pp.Word(').', exact=1) + pp.SkipTo(pp.LineEnd())
+        parse_poss_ans = pp.Word(pp.alphas, exact=1) + pp.Suppress(pp.Word(').', exact=1)) + pp.SkipTo(pp.LineEnd())
         parse_shuffle = pp.Suppress('SHUFFLE:') + pp.SkipTo(pp.LineEnd())
-        parse_answer = pp.Suppress('ANSWER:') + pp.SkipTo(pp.LineEnd())
+        parse_answer = pp.Suppress('ANSWER:') + pp.delimitedList(pp.Word(pp.alphas, exact=1))
 
         flag = ''
         tmp = ''
@@ -39,29 +39,28 @@ class StepQuiz(Step):
             if not answer:
                 if not parse_answer.matches(line):
                     if parse_poss_ans.matches(line.lstrip()):
-                        tmp = line[0]
-                        possible_answers[line[0]] = line[2:].strip()
+                        poss_ans = parse_poss_ans.parseString(line.lstrip())
+                        tmp = poss_ans[0]
+                        possible_answers[poss_ans[0]] = poss_ans[1].strip()
                         continue
 
             if parse_shuffle.matches(line):
-                if line[8:].strip().lower() == 'false':
-                    shuffle = False
-                elif line[8:].strip().lower() == 'true':
-                    shuffle = True
+                sh = parse_shuffle.parseString(line)[0].strip().lower()
+                if sh not in ['true', 'false']:
+                    raise ValueError('Incorrect shuffle')
+                shuffle = False if sh == 'false' else 'true'
                 continue
 
             if parse_answer.matches(line):
+                parse_tmp = pp.Suppress("ANSWER:") + pp.SkipTo(pp.LineEnd())
+                line = "ANSWER: " + parse_tmp.parseString(line)[0].replace(' ', '')
                 answer_res = parse_answer.parseString(line)
-                answer.append(answer_res[0].strip().split(','))
+                answer.append(answer_res.asList())
                 continue
 
             if tmp:
                 if '\n' in possible_answers[tmp] or line.strip():
                     possible_answers[tmp] += '\n' + line
-
-        for i in range(len(answer)):
-            for j in range(len(answer[i])):
-                answer[i][j] = answer[i][j].strip()
 
         return question, possible_answers, shuffle, answer
 
@@ -69,6 +68,7 @@ class StepQuiz(Step):
         super().__init__(step_id, title)
         self.question = ''
         self.possible_answers = {}
+        self.shuffle = True
         self.answer = []
 
     def to_json(self):
@@ -78,6 +78,7 @@ class StepQuiz(Step):
             "type": "string",
             "question": self.question,
             "possible answers": self.possible_answers,
+            "shuffle": self.shuffle,
             "answer": self.answer
         }
 
