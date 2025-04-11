@@ -40,6 +40,17 @@ class Step:
             case 'QUIZ':
                 return StepQuiz.parse(text)
 
+    def update(self, step_position):
+        """Обновляет шаг на степике."""
+        pass
+
+    def create(self, step_position):
+        """Создает шаг на степике."""
+        pass
+
+    def remove(self, step_position):
+        """Удаляет шаг на степике."""
+        pass
 
 class StepText(Step):
     """

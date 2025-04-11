@@ -29,6 +29,13 @@ def get_existing_steps(lesson_id, token):
 
 def main():
     print(f"Работаем с уроком ID: {LESSON_ID}")
+
+    # сначала разобрать аргументы запуска lesson_id, step_position etc
+    # user_session = UserSession()  авторизация, получаем токен, храним его в объекте
+    # lesson = Lesson.parse(md_filename)
+    # lesson.update(user_session, step_position=step_pos)
+    # тут идет запрос информации об уроке, заполнение step_ip существующих шагов
+    # далее update, create, remove...
     
     # Получаем шаги
     try:
