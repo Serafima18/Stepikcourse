@@ -62,14 +62,14 @@ class StepQuiz(Step):
                 if '\n' in possible_answers[tmp] or line.strip():
                     possible_answers[tmp] += '\n' + line
 
-        return question, possible_answers, shuffle, answer
+        return question, possible_answers, answer, shuffle
 
-    def __init__(self, step_id, title):
+    def __init__(self, step_id, title, question, possible_answers, answer, shuffle=True):
         super().__init__(step_id, title)
-        self.question = ''
-        self.possible_answers = {}
-        self.shuffle = True
-        self.answer = []
+        self.question = question
+        self.possible_answers = possible_answers
+        self.shuffle = shuffle
+        self.answer = answer
 
     def to_json(self):
         result = {
