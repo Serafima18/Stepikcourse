@@ -14,9 +14,10 @@ class StepQuiz(Step):
 
         parse_poss_ans = pp.Word(pp.alphas, exact=1) + pp.Word(').', exact=1) + pp.SkipTo(pp.LineEnd())
         parse_shuffle = pp.Suppress('SHUFFLE:') + pp.SkipTo(pp.LineEnd())
-        parse_answer = pp.Suppress("ANSWER:") + pp.SkipTo(pp.LineEnd())
+        parse_answer = pp.Suppress('ANSWER:') + pp.SkipTo(pp.LineEnd())
 
         flag = ''
+        tmp = ''
 
         for line in lines:
             if not answer and not possible_answers and flag != 'TEXTEND':
@@ -38,8 +39,8 @@ class StepQuiz(Step):
             if not answer:
                 if not parse_answer.matches(line):
                     if parse_poss_ans.matches(line.lstrip()):
-                        n = line[0]
-                        possible_answers[n] = line[2:].strip()
+                        tmp = line[0]
+                        possible_answers[line[0]] = line[2:].strip()
                         continue
 
             if parse_shuffle.matches(line):
@@ -47,13 +48,20 @@ class StepQuiz(Step):
                     shuffle = False
                 elif line[8:].strip().lower() == 'true':
                     shuffle = True
+                continue
 
             if parse_answer.matches(line):
                 answer_res = parse_answer.parseString(line)
                 answer.append(answer_res[0].strip().split(','))
+                continue
 
-        for i in range(len(answer[0])):
-            answer[0][i] = answer[0][i].strip()
+            if tmp:
+                if '\n' in possible_answers[tmp] or line.strip():
+                    possible_answers[tmp] += '\n' + line
+
+        for i in range(len(answer)):
+            for j in range(len(answer[i])):
+                answer[i][j] = answer[i][j].strip()
 
         return question, possible_answers, shuffle, answer
 
