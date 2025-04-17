@@ -9,9 +9,9 @@ ANSWER: Синий
 ANSWER: Красный
 '''
     step_test = Step(1, "title")
-    question, answer = step_test.parse(text, "STRING")
-    assert question == "Какой ваш любимый цвет?"
-    assert answer == ["синий", "красный"]
+    step_string_test = step_test.parse(text, "STRING")
+    assert step_string_test.question == "Какой ваш любимый цвет?"
+    assert step_string_test.answer == ["синий", "красный"]
 
 
 def test_parsing_string2():
@@ -22,9 +22,9 @@ def test_parsing_string2():
 ANSWER: MIPT
 '''
     step_test = Step(1, "title")
-    question, answer = step_test.parse(text, "STRING")
-    assert question == 'Попросим студента написать "MIPT". Напишите "MIPT".\n'
-    assert answer == ["mipt"]
+    step_string_test = step_test.parse(text, "STRING")
+    assert step_string_test.question == 'Попросим студента написать "MIPT". Напишите "MIPT".\n'
+    assert step_string_test.answer == ["mipt"]
 
 
 def test_parsing_string3():
@@ -38,10 +38,10 @@ ANSWER:  Я учусь в МФТИ
 
 '''
     step_test = Step(1, "title")
-    question, answer = step_test.parse(text, "STRING")
-    assert question == \
+    step_string_test = step_test.parse(text, "STRING")
+    assert step_string_test.question == \
 '''Попросим студента написать "Я учусь в МФТИ". Напишите  "Я учусь в МФТИ".
 
 Много строк в условии.
 '''
-    assert answer == ["я учусь в мфти"]
+    assert step_string_test.answer == ["я учусь в мфти"]

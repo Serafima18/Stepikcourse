@@ -62,7 +62,7 @@ class StepQuiz(Step):
                 if '\n' in possible_answers[tmp] or line.strip():
                     possible_answers[tmp] += '\n' + line
 
-        return question, possible_answers, answer, shuffle
+        return StepQuiz(None, None, question, possible_answers, answer, shuffle)
 
     def __init__(self, step_id, title, question, possible_answers, answer, shuffle=True):
         super().__init__(step_id, title)

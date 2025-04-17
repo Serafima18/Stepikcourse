@@ -26,7 +26,7 @@ class StepString(Step):
                 answer_result = parse_answer.parseString(line)
                 answer.append(answer_result[0].strip().lower())
 
-        return question, answer
+        return StepString(None, None, question, answer)
 
     def __init__(self, step_id, title, question, answer, regexp=None):
         super().__init__(step_id, title)

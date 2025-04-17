@@ -4,10 +4,25 @@ from get_steps_id import _steps_id, get_token
 
 
 def update_step(step_id, token, txt):
-    url = f'https://stepik.org/api/steps/{step_id}'
+    url = f'https://stepik.org/api/step-sources/{step_id}'
     headers = {'Authorization': f'Bearer {token}', 'Content-type': 'application/json'}
-    data = {'step': {'text': txt}}
-    response = requests.patch(url, headers=headers, json=data)  # ругается на put, patch и post
+    data = {
+        'step-source': {
+            'id': step_id,
+            'block': {
+                'name': 'text',
+                'text': txt,
+                'source': {'id': step_id},
+                'is_html_enabled': True,
+                'preserve_order': False
+            },
+
+            'lesson': 1659223,
+            'position': 1
+        }
+    }
+
+    response = requests.put(url, headers=headers, json=data)
     print(response.status_code)
     print(response.json())
 

@@ -18,22 +18,22 @@ SHUFFLE: False
 ANSWER: A, D, C
 '''
     step_test = Step(1, "title")
-    question, possible_answers, shuffle, answer = step_test.parse(text, "QUIZ")
-    assert question == \
+    step_quiz_test = step_test.parse(text, "QUIZ")
+    assert step_quiz_test.question == \
 '''Отметьте правильные ответы. SHUFFLE - перемешивать ответы при очередном прохождении теста.
 По умолчанию они перемешиваются. Отключается перемешивание установкой опции в значение false (без учета регистра).
 
 Множественный выбор - пишем буквы в ответе через запятую. Пробелы игнорируются.
 '''
-    assert answer == [['A', 'D', 'C']]
-    assert possible_answers == \
+    assert step_quiz_test.answer == [['A', 'D', 'C']]
+    assert step_quiz_test.possible_answers == \
            {
                'A': 'Это правильный ответ.',
                'B': 'Нет.',
                'C': 'Тоже хорошо.',
                'D': 'Еще один правильный.'
            }
-    assert not shuffle
+    assert not step_quiz_test.shuffle
 
 
 def test_parsing_quiz2():
@@ -67,8 +67,8 @@ C. square(100) нарисует синий квадрат размером 100
 ANSWER: A,C
 '''
     step_test = Step(1, "title")
-    question, possible_answers, shuffle, answer = step_test.parse(text, "QUIZ")
-    assert question == \
+    step_quiz_test = step_test.parse(text, "QUIZ")
+    assert step_quiz_test.question == \
 '''Если текст вопроса может выглядеть как вариант ответа, то есть начаться с а) или a.,
 то стоит явно обозначить начало и конец вопроса с помощью TEXTBEGIN и TEXTEND.
 
@@ -87,14 +87,14 @@ def square(size, col='blue'):
     t.lt(90)
 Отметьте правильные предложения.
 '''
-    assert answer == [['A', 'C']]
-    assert possible_answers == \
+    assert step_quiz_test.answer == [['A', 'C']]
+    assert step_quiz_test.possible_answers == \
            {
                'A': "square(100, 'red') нарисует красный квадрат размером 100",
                'B': "square(100) нарисует красный квадрат размером 100",
                'C': "square(100) нарисует синий квадрат размером 100"
            }
-    assert shuffle
+    assert step_quiz_test.shuffle
 
 
 def test_parsing_quiz3():
@@ -116,13 +116,13 @@ print(x)
 ANSWER: C
 '''
     step_test = Step(1, "title")
-    question, possible_answers, shuffle, answer = step_test.parse(text, "QUIZ")
-    assert question == \
+    step_quiz_test = step_test.parse(text, "QUIZ")
+    assert step_quiz_test.question == \
 '''Это вопрос в формате AIKEN. SHUFFLE - перемешивать ответы при очередном прохождении теста.
 По умолчанию они перемешиваются. Отключается перемешивание установкой опции в значение false (без учета регистра).
 '''
-    assert answer == [['C']]
-    assert possible_answers == \
+    assert step_quiz_test.answer == [['C']]
+    assert step_quiz_test.possible_answers == \
            {
                'A': 'ответ 1',
                'B': \
@@ -135,4 +135,4 @@ if 2 < 3:
 x = 'Ответ только из блока кода, блок кода надо написать с новой строки'
 print(x)'''
            }
-    assert shuffle
+    assert step_quiz_test.shuffle

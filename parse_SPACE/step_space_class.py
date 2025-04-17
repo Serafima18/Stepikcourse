@@ -54,7 +54,7 @@ class StepSpace(Step):
                     question += '\n'
                 question += line
 
-        return question, txt_space, space_number, answer
+        return StepSpace(None, None, question, txt_space, space_number, answer)
 
     def __init__(self, step_id, title, question, txt_space, space_number, answer):
         super().__init__(step_id, title)

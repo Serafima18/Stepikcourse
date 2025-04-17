@@ -14,20 +14,20 @@ TEXTEND
 ANSWER: Red, Blue
 '''
     step_test = Step(1, "title")
-    question, txt_space, space_number, answer = step_test.parse(text, "SPACE")
-    assert question == \
+    step_space_test = step_test.parse(text, "SPACE")
+    assert step_space_test.question == \
 '''Задание заполнить пробелы
 
 '''
-    assert answer == [
+    assert step_space_test.answer == [
         {
             1: 'Red',
             2: 'Blue'
         }
     ]
 
-    assert txt_space == \
+    assert step_space_test.txt_space == \
 '''Заполни вот этот ___ пробел чем_нибудь.
 И вот этот ___ тоже'''
 
-    assert space_number == 2
+    assert step_space_test.space_number == 2
