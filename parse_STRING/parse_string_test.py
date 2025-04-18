@@ -8,10 +8,9 @@ def test_parsing_string1():
 ANSWER: Синий
 ANSWER: Красный
 '''
-    step_test = Step(1, "title")
-    step_string_test = step_test.parse(text, "STRING")
-    assert step_string_test.question == "Какой ваш любимый цвет?"
-    assert step_string_test.answer == ["синий", "красный"]
+    step_test = Step.parse(1, 'title', text, "STRING")
+    assert step_test.question == "Какой ваш любимый цвет?"
+    assert step_test.answer == ["синий", "красный"]
 
 
 def test_parsing_string2():
@@ -21,10 +20,9 @@ def test_parsing_string2():
 
 ANSWER: MIPT
 '''
-    step_test = Step(1, "title")
-    step_string_test = step_test.parse(text, "STRING")
-    assert step_string_test.question == 'Попросим студента написать "MIPT". Напишите "MIPT".\n'
-    assert step_string_test.answer == ["mipt"]
+    step_test = Step.parse(1, 'title', text, "STRING")
+    assert step_test.question == 'Попросим студента написать "MIPT". Напишите "MIPT".\n'
+    assert step_test.answer == ["mipt"]
 
 
 def test_parsing_string3():
@@ -37,11 +35,10 @@ def test_parsing_string3():
 ANSWER:  Я учусь в МФТИ
 
 '''
-    step_test = Step(1, "title")
-    step_string_test = step_test.parse(text, "STRING")
-    assert step_string_test.question == \
+    step_test = Step.parse(1, 'title', text, "STRING")
+    assert step_test.question == \
 '''Попросим студента написать "Я учусь в МФТИ". Напишите  "Я учусь в МФТИ".
 
 Много строк в условии.
 '''
-    assert step_string_test.answer == ["я учусь в мфти"]
+    assert step_test.answer == ["я учусь в мфти"]

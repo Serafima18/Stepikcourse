@@ -3,8 +3,8 @@ from step_classes import Step
 
 
 class StepSpace(Step):
-    @staticmethod
-    def parse(text):
+    @classmethod
+    def parse(cls, step_id, title, text, step_type=None):
         question = ""
         txt_space = ""
         space_number = 0
@@ -54,7 +54,7 @@ class StepSpace(Step):
                     question += '\n'
                 question += line
 
-        return StepSpace(None, None, question, txt_space, space_number, answer)
+        return StepSpace(step_id, title, question, txt_space, space_number, answer)
 
     def __init__(self, step_id, title, question, txt_space, space_number, answer):
         super().__init__(step_id, title)

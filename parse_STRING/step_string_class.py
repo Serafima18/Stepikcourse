@@ -7,8 +7,8 @@ class StepString(Step):
     Класс для строковых задач, требующих текстовых ответов.
     """
 
-    @staticmethod
-    def parse(text):
+    @classmethod
+    def parse(cls, step_id, title, text, step_type=None):
         question = ""
         answer = []
 
@@ -26,7 +26,7 @@ class StepString(Step):
                 answer_result = parse_answer.parseString(line)
                 answer.append(answer_result[0].strip().lower())
 
-        return StepString(None, None, question, answer)
+        return StepString(step_id, title, question, answer)
 
     def __init__(self, step_id, title, question, answer, regexp=None):
         super().__init__(step_id, title)

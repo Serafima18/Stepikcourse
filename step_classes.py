@@ -25,7 +25,7 @@ class Step:
         raise NotImplementedError("Subclasses should implement this!")
 
     @classmethod
-    def parse(cls, text, step_type=None):
+    def parse(cls, step_id, title, text, step_type=None):
         from parse_STRING.step_string_class import StepString
         from parse_QUIZ.step_quiz_class import StepQuiz
         from parse_SPACE.step_space_class import StepSpace
@@ -33,15 +33,15 @@ class Step:
             raise NotImplemented("Incorrect step type")
         match step_type:
             case 'TEXT':
-                return StepText.parse(text)
+                return StepText.parse(step_id, title, text)
             case 'STRING':
-                return StepString.parse(text)
+                return StepString.parse(step_id, title, text)
             case 'NUMBER':
-                return StepNumber.parse(text)
+                return StepNumber.parse(step_id, title, text)
             case 'QUIZ':
-                return StepQuiz.parse(text)
+                return StepQuiz.parse(step_id, title, text)
             case 'SPACE':
-                return StepSpace.parse(text)
+                return StepSpace.parse(step_id, title, text)
 
     def update(self, step_position):
         """Обновляет шаг на степике."""

@@ -3,8 +3,8 @@ import pyparsing as pp
 
 
 class StepQuiz(Step):
-    @staticmethod
-    def parse(text):
+    @classmethod
+    def parse(cls, step_id, title, text, step_type=None):
         question = ""
         possible_answers = {}
         shuffle = True
@@ -62,7 +62,7 @@ class StepQuiz(Step):
                 if '\n' in possible_answers[tmp] or line.strip():
                     possible_answers[tmp] += '\n' + line
 
-        return StepQuiz(None, None, question, possible_answers, answer, shuffle)
+        return StepQuiz(step_id, title, question, possible_answers, answer, shuffle)
 
     def __init__(self, step_id, title, question, possible_answers, answer, shuffle=True):
         super().__init__(step_id, title)
