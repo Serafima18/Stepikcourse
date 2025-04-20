@@ -1,24 +1,75 @@
 <!DOCTYPE html>
 <html>
+
+<head>
+    <meta charset='UTF-8'>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td,
+        th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+
+        details {
+            margin: 1rem;
+            transition: margin 0.3s ease;
+        }
+
+        details[open] {
+            margin: 1.5rem;
+            padding: 1.2rem;
+        }
+
+        h2 {
+            margin: 2rem 1rem;
+
+            /* 1rem = 16px (относительно размера шрифта) */
+            @media (max-width: 768px) {
+                margin: 1rem 0.5rem;
+            }
+        }
+    </style>
+
+    <title>Таблица результатов класса</title>
+
+    <script type="text/javascript">
+        window.STEPIC_MAIN_CSS_URL = "https://cdn.stepik.net/static/frontend-build/stepic.css?1715609470";
+    </script>
+    <link rel="preload" as="style" href="https://cdn.stepik.net/static/frontend-build/critical.css?1715609470">
+    <link rel="stylesheet" href="https://cdn.stepik.net/static/frontend-build/fonts.css?1715609470">
+    <link rel="stylesheet" href="https://cdn.stepik.net/static/frontend-build/vendor.css?1715609470">
+    <link rel="stylesheet" href="https://cdn.stepik.net/static/frontend-build/critical.css?1715609470">
+    <link rel="stylesheet" href="https://cdn.stepik.net/static/frontend-build/stepic.css?1715609470">
+
+
+    <link rel="stylesheet" href="details.css">
+
+</head>
+
 <body>
+    <div style="padding: 15px;">
+        <h1>Табель успеваемости</h1>
+    </div>
+    {% set sections = data['sections'] %}
+    {% set sections_ids = data['course']['sections'] %} {% set lessons = data['lessons'] %}
+    {% include 'general_table_template.html' %}
 
-<style>
-  table, th, td {
-    border: 1px solid black;
-    border-collapse: collapse;
-  }
-  th, td {
-    padding: 5px;
-    text-align: left;
-  }
-</style>
-
-<h2>Табель успеваемости</h2>
-
-{% set sections = data.sections %}
-{% set lessons = data.lessons %}
-
-{% include 'module_template.html' %}
+    {# Проходимся во модулям и создаем для них таблички #} {% set sections = data['sections'] %}
+    {% set sections_ids = data['course']['sections'] %} {% set lessons = data['lessons'] %} {% for id in sections_ids %}
+    {% set section_id = id %} {% set section_name
+    = sections[id]['title'] %} {% include 'module_template.html' %} {% endfor %}
 
 </body>
+
 </html>

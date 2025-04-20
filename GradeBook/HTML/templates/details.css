@@ -1,0 +1,6 @@
+details {
+    margin: 20px; /* Отступ со всех сторон */
+    padding: 15px; /* Внутренний отступ */
+    border: 1px solid #e0e0e0;
+    border-radius: 8px; /* Закругленные углы */
+  }

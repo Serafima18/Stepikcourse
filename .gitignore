@@ -6,3 +6,6 @@ GradeBook/grade_table0.py
 GradeBook/grade_table02.py
 GradeBook/StepicAPI/__pycache__
 GradeBook/README.md
+.vscode
+GradeBook/data.json
+GradeBook/config.json

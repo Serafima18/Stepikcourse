@@ -81,7 +81,7 @@ class CourseData(StepikAPIClient):
         self._data.update({'sections': [section['id'] for section in sections]})
 
         self._sections = {
-            section['id']: self._process_section(section, units_dict)
+            int(section['id']): self._process_section(section, units_dict)
             for section in sections
         }
 
@@ -116,7 +116,7 @@ class CourseData(StepikAPIClient):
     @staticmethod
     def _process_section(section: Dict, units_dict: Dict) -> Dict:
         return {
-            'id': section['id'],
+            'id': int(section['id']),
             'title': section['title'],
             'position': section['position'],
             'course_id': section['course'],
@@ -126,7 +126,7 @@ class CourseData(StepikAPIClient):
     @staticmethod
     def _process_unit(unit: Dict) -> Dict:
         return {
-            'id': unit['id'],
+            'id': int(unit['id']),
             'position': unit['position'],
             'section_id': unit['section'],
             'lesson_id': unit['lesson']
@@ -135,7 +135,7 @@ class CourseData(StepikAPIClient):
     @staticmethod
     def _process_lesson(lesson: Dict) -> Dict:
         return {
-            'id': lesson['id'],
+            'id': int(lesson['id']),
             'title': lesson['title'],
             'steps': lesson['steps']
         }
@@ -143,7 +143,7 @@ class CourseData(StepikAPIClient):
     @staticmethod
     def _process_step(step: Dict) -> Dict:
         return {
-            'id': step['id'],
+            'id': int(step['id']),
             'lesson_id': step['lesson'],
             'position': step['position'],
             'block_type': step['block']['name']

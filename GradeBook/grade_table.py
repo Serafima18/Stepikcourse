@@ -5,6 +5,26 @@ from progress.bar import IncrementalBar
 import argparse
 import json
 
+
+def get_module_grades(students_dict, data, grades):
+    '''Получение сумарных оценок учеников по модулям'''
+    module_grades = {}
+    for student in students_dict:
+        gr_dict = {}
+        for section in data['course']['sections']:
+            sum_grades = 0
+            for lesson in data['sections'][section]['lessons']:
+                for step in data["lessons"][lesson]["steps"]:
+                    if step in grades[student]:
+                        sum_grades += grades[student][step]
+            gr_dict[section] = sum_grades
+        module_grades[int(student)] = gr_dict
+    return module_grades
+
+
+TEMPLATES_DIR = "./HTML/templates/"
+TABLE_TEMPLATE = "table_template.html"
+
 if __name__ == '__main__':
     #  progress bar
     bar = IncrementalBar('Progress', max=8)
@@ -15,7 +35,7 @@ if __name__ == '__main__':
         '--config',
         '-c',
         type=str,
-        default='./StepicAPI/config.json',
+        default='./config.json',
         help='Путь до конфигурационного файла'
     )
     parser.add_argument(
@@ -38,7 +58,6 @@ if __name__ == '__main__':
         bar.next()
         course_id = data["course_id"]
         class_id = data["class_id"]
-        section_id = data["section_id"]
         client_id = data["client_id"]
         client_secret = data["client_secret"]
 
@@ -71,13 +90,16 @@ if __name__ == '__main__':
         bar.next()
 
         #  Загружаем и подставляем шаблон
-        environment = Environment(loader=FileSystemLoader("./HTML/templates/"))
-        template = environment.get_template("table_template.html")
+        environment = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
+        template = environment.get_template(TABLE_TEMPLATE)
         content = template.render(
             data=course_data.data,
-            section_id=section_id,
             students=students_dict,
             grades=grades,
+            module_grades=get_module_grades(
+                                    students_dict,
+                                    course_data.data,
+                                    grades)
         )
         bar.next()
 
@@ -91,3 +113,5 @@ if __name__ == '__main__':
         print(f'В файле {file_conf} нет элемента с ключом {e}')
     except InvalidToken as e:
         print(e)
+    except Exception as e:
+        print(f"Ошибка: {str(e)}")

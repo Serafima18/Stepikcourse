@@ -1,64 +1,47 @@
-<table style="width:20%">
+{# ОБРАЩЕНИЕ К СЛОВАРЮ, ЕСЛИ КЛЮЧ: СТРОКА - ЧЕРЕЗ . ЧИСЛО - ЧЕРЕЗ []!!!! #}
+<details>
+    <summary><big><big>{{ section_name }}</big></big>
+    </summary>
+    <table class="course-grade-book-table__table">
 
-  {#
-      ОБРАЩЕНИЕ К СЛОВАРЮ, ЕСЛИ КЛЮЧ:
-      СТРОКА - ЧЕРЕЗ .
-      ЧИСЛО - ЧЕРЕЗ []!!!!
-  #}
-<!-- 
-  {% macro steps_count(section_id) %}
-    {% set total_steps = 0 %}
-    {% for lesson_id in sections[section_id].lessons %}
-        {% set lesson_steps = lessons[lesson_id].steps %}
-        {% set steps_count = lesson_steps|length %}
-        {% set total_steps = total_steps + steps_count %}
-    {% endfor %}
-    <th colspan="{{ total_steps }}" style="text-align: center;">{{ sections[section_id].title|string }} {{ total_steps }}</th>
-  {% endmacro %} -->
+        <tr>
+            <th colspan="2" rowspan="2" style="text-align: center;"> Ученики </th>
+        </tr>
 
-  {# Попытки посчитать кол-во шагов #}
-<tr>
-    <th colspan="2" rowspan="3" style="text-align: center;">Ученики</th>
-    <!-- {{ steps_count(section_id) }} -->
-    {% set length = 2|int %}
-    {% for lesson_id in sections[section_id].lessons %}
-        {% set length = length + lessons[lesson_id].steps|length|int %}
-    {% endfor %}
-    <th colspan="{{ length }}" style="text-align: center;">{{ sections[section_id].title|string }} {{ length }}</th>
-</tr>
 
-  {# Выводим названия и id уроков #}
-  <tr>
-    {% for lesson_id in sections[section_id].lessons %}
-      <th colspan="{{ lessons[lesson_id].steps|length }}"  style="text-align: center;">{{ lessons[lesson_id].title }}({{ lesson_id }})</th>
-    {% endfor %}
-  </tr>
+        {# Выводим названия и id уроков #}
+        <tr>
+            {% for lesson_id in sections[section_id].lessons %}
+            <th colspan="{{ lessons[lesson_id].steps|length }}" style="text-align: center;">
+                {{ lessons[lesson_id].title }}({{ lesson_id }}) </th>
+            {% endfor %}
+        </tr>
 
-  {# Выводим названия и id шагов #}
-  <tr>
-    {% for lesson_id in sections[section_id].lessons %}
-        {% for step_id in lessons[lesson_id].steps %}
-         <td>S{{ loop.index0 }}</td>
-          <!-- <td>{{ step_id }}</td> -->
+        <tr>
+            {# "id"  и "имя" #}
+            <th style="text-align: center;"> Id </th>
+            <th style="text-align: center;"> Имя </th>
+
+            {# Выводим названия и id шагов #}
+            {% for lesson_id in sections[section_id].lessons %} {% for step_id in lessons[lesson_id].steps %}
+            <td>S{{ loop.index }}</td>
+            {% endfor %} {% endfor %}
+        </tr>
+
+
+        {# Выводим оценки студентов #} {% for student_id in students %}
+        <tr>
+            <td>{{ student_id }}</td>
+            <td>{{ students[student_id] }}</td>
+            {% for lesson_id in sections[section_id].lessons %} {% for step_id in lessons[lesson_id].steps %}
+            {% if step_id in grades[student_id] %}
+            <td class="gradesheet-cell" data-index="0" data-is-passed="" data-is-success="">
+                {{ grades[student_id][step_id] }}</td>
+            {% else %}
+            <td class="gradesheet-cell" data-index="0" data-is-passed="" data-is-success="">-</td>
+            {% endif %} {% endfor %} {% endfor %}
+        </tr>
         {% endfor %}
-    {% endfor %}
-  </tr>
 
-  {# Выводим оценки студентов #}
-
-  {% for student_id in students %}
-    <tr>
-      <td>{{ student_id }}</td>
-      <td>{{ students[student_id] }}</td>
-      {% for lesson_id in sections[section_id].lessons %}
-        {% for step_id in lessons[lesson_id].steps %}
-          {% if step_id in grades[student_id] %}
-            <td>{{ grades[student_id][step_id] }}</td>
-          {% else %}
-            <td>-</td>
-          {% endif %}
-        {% endfor %}
-      {% endfor %}   
-    </tr>
-  {% endfor %}
-</table>
+    </table>
+</details>
