@@ -4,6 +4,9 @@
 
         <tr>
             <th colspan="2" rowspan="1" style="text-align: center;"> Ученики </th>
+            {# Total sum of grades #}
+            <th rowspan="2" style="text-align: center;">
+                Всего </th>
             {# Выводим названия и id уроков #}
             {% for section_id in sections_ids %}
             <th rowspan="2" style="text-align: center;">
@@ -22,6 +25,8 @@
         <tr>
             <td>{{ student_id }}</td>
             <td>{{ students[student_id] }}</td>
+            <td class="gradesheet-cell" data-index="0" data-is-passed="" data-is-success="">
+                {{ module_grades[student_id]['total_sum'] }}</td>
             {# Считаем сумму всех оценок по всем модулям #}
             {% set sections_ids = data['course']['sections'] %}
             {% set lessons = data['lessons'] %}

@@ -11,6 +11,7 @@ def get_module_grades(students_dict, data, grades):
     module_grades = {}
     for student in students_dict:
         gr_dict = {}
+        total_sum = 0
         for section in data['course']['sections']:
             sum_grades = 0
             for lesson in data['sections'][section]['lessons']:
@@ -18,6 +19,8 @@ def get_module_grades(students_dict, data, grades):
                     if step in grades[student]:
                         sum_grades += grades[student][step]
             gr_dict[section] = sum_grades
+            total_sum += sum_grades
+        gr_dict['total_sum'] = total_sum
         module_grades[int(student)] = gr_dict
     return module_grades
 
