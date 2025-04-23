@@ -16,7 +16,8 @@ def get_module_grades(students_dict, data, grades):
             sum_grades = 0
             for lesson in data['sections'][section]['lessons']:
                 for step in data["lessons"][lesson]["steps"]:
-                    if step in grades[student]:
+                    if step in grades[student] and data['steps'][step]['block_type'] != "text":
+
                         sum_grades += grades[student][step]
             gr_dict[section] = sum_grades
             total_sum += sum_grades

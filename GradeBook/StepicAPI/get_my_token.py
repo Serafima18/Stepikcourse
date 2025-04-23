@@ -27,7 +27,7 @@ def get_token(client_id: str, client_secret: str) -> str:
 
 
 if __name__ == '__main__':
-    with open('./StepicAPI/config.json', 'r') as file:
+    with open('./config.json', 'r') as file:
         data = json.load(file)
 
     client_id = data["client_id"]

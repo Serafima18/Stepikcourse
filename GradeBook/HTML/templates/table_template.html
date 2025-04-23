@@ -67,6 +67,7 @@
     {% include 'general_table_template.html' %}
 
     {# Проходимся во модулям и создаем для них таблички #} {% set sections = data['sections'] %}
+    {% set steps = data['steps'] %}
     {% set sections_ids = data['course']['sections'] %} {% set lessons = data['lessons'] %} {% for id in sections_ids %}
     {% set section_id = id %} {% set section_name
     = sections[id]['title'] %} {% include 'module_template.html' %} {% endfor %}
