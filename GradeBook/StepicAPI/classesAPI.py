@@ -217,12 +217,20 @@ class GradeBook(StepikAPIClient):
             return []
         
     def get_grades_pair(self) -> List[Dict]:
-        """Получаем все оценки по классу в виде {stedent_id: [{"score": ..., "step": ...}]}"""
+        """Получаем все оценки по классу в виде {stedent_id: [{"score": ..., "step": ...}]}
+            None - нет посылок; 0 - посылки были, но верные; все остальное - оценка
+        """
         grades = self.get_grades()
         d = dict()
+        pr = Parcels(self.token, class_id=self.class_id)
+        # Если нет посылок, то ставим None
         for student_grade in grades:
             d[student_grade['user']] = {
-                    int(grade['step_id']): grade['score']
+                    int(grade['step_id']): (
+                        0 if not grade['is_passed'] and grade['total_submissions'] != 0
+                        else None if grade['total_submissions'] == 0
+                        else grade['score']
+                    )
                     for _, grade in student_grade['results'].items()
                 }
         return d

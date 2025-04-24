@@ -36,16 +36,20 @@
             <td><a href="https://stepik.org/users/{{student_id}}/profile"  target="_blank">{{ students[student_id] }}</a></td>
             {% for lesson_id in sections[section_id].lessons %}
                 {% for step_id in lessons[lesson_id].steps %}
-                    {% if step_id in grades[student_id] and steps[step_id]['block_type'] != "text" %}
+                    {% if step_id in grades[student_id] and grades[student_id][step_id] != 0 and grades[student_id][step_id] != None and steps[step_id]['block_type'] != "text" %}
                         <td class="gradesheet-cell" data-index="0" data-is-passed="" data-is-success="">
-                            {{ grades[student_id][step_id] }}</td>
+                            <a href="https://stepik.org/submissions/{{step_id}}?search=id:{{student_id}}&klass={{class_id}}"  target="_blank"  style="color: black;">
+                            {{ grades[student_id][step_id] }}</a></td>
+                    {% elif step_id in grades[student_id] and grades[student_id][step_id] == 0 and steps[step_id]['block_type'] != "text" %}
+                        <td class="gradesheet-cell" data-index="0" data-is-passed="" data-is-success="" title="Есть только неверные решения">
+                            <a href="https://stepik.org/submissions/{{step_id}}?search=id:{{student_id}}&klass={{class_id}}"  target="_blank"  style="color: black;">
+                                0</a></td>
                     {% else %}
-                        <td class="gradesheet-cell" data-index="0" data-is-passed="" data-is-success="">-</td>
+                        <td class="gradesheet-cell" data-index="0" data-is-passed="" data-is-success="" title="Нет отправленных решений">-</td>
                     {% endif %}
                 {% endfor %}
             {% endfor %}
         </tr>
         {% endfor %}
-
     </table>
 </details>
