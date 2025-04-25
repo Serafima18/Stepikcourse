@@ -1,77 +1,137 @@
 import pyparsing as pp
+import re
 from step_classes import Step
 
 
 class StepSpace(Step):
     @classmethod
     def parse(cls, step_id, title, text, step_type=None):
+        rus_alp = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'
+
         question = ""
         txt_space = ""
         space_number = 0
-        answer = []
+        answer = {
+            'space with choice': {},
+            'space without': {}
+        }
+
+        caseless = True
+        show_correct = True
+        score_formula = True
+        score = 0
 
         lines = [line for line in text.splitlines()]
-        parse_answer = pp.Suppress('ANSWER:') + pp.delimitedList(pp.Word(pp.alphas))
+        parse_spacetext = pp.Suppress('SPACETEXT')
+        parse_config = pp.Suppress('CONFIG')
+        parse_caseless = pp.Suppress('CASELESS:') + (pp.CaselessKeyword('true') | pp.CaselessKeyword('false'))
+        parse_show_correct = pp.Suppress('SHOW_CORRECT:') + (pp.CaselessKeyword('true') | pp.CaselessKeyword('false'))
+        parse_score_form = pp.Suppress('SCORE_FORMULA:') + (pp.CaselessKeyword('true') | pp.CaselessKeyword('false'))
+        parse_score = pp.Suppress('SCORE:') + pp.Word(pp.nums)
+        parse_answer = pp.delimitedList(pp.Word(pp.alphanums + rus_alp + '@'), delim=';')
 
         flag = ''
 
         for line in lines:
-            if parse_answer.matches(line):
-                parse_tmp = pp.Suppress("ANSWER:") + pp.SkipTo(pp.LineEnd())
-                line = "ANSWER: " + parse_tmp.parseString(line)[0].replace(' ', '')
-                answer_result = parse_answer.parseString(line)
-
-                if len(answer_result.asList()) != space_number:
-                    raise ValueError("Incorrect answer")
-
-                ans = {}
-
-                for i in range(len(answer_result.asList())):
-                    ans[i + 1] = answer_result[i]
-
-                answer.append(ans)
-                continue
-
-            if flag == 'TEXTBEGIN':
-                if line.strip() == 'TEXTEND':
-                    flag = 'TEXTEND'
-                    question += '\n'
+            if flag == 'SPACETEXT':
+                if parse_config.matches(line):
+                    flag = 'CONFIG'
                     continue
 
-                if txt_space or line:
-                    if txt_space:
-                        txt_space += '\n'
+                if txt_space:
+                    txt_space += '\n'
+
+                if '___' in line:
+                    inner_content = pp.CharsNotIn("[]")
+                    enclosed = pp.Suppress("___[") + inner_content + pp.Suppress("]")
+
+                    extracted_list = enclosed.searchString(line)
+
+                    ln = [item[0] for item in extracted_list]
+                    num = len(ln)
+
+                    line = re.sub(r"___\[[^\]]+\]", "___", line)
+
+                    for i in range(num):
+                        n = space_number + i + 1
+                        tmp = (parse_answer.parseString(ln[i])).asList()
+
+                        if '@' in ln[i]:
+                            answer['space with choice'][n] = {'right ans': [], 'all ans': []}
+
+                            for j in range(len(tmp)):
+                                if not tmp[j]:
+                                    continue
+
+                                if tmp[j][0] == '@':
+                                    tmp[j] = tmp[j][1:]
+                                    answer['space with choice'][n]['right ans'].append(tmp[j])
+
+                                answer['space with choice'][n]['all ans'].append(tmp[j])
+                        else:
+                            answer['space without'][n] = tmp
+
                     txt_space += line
-                    space_number += len([st for st in line.split() if st in '_' * 100])
+                    space_number += num
                 continue
 
-            if line.strip() == 'TEXTBEGIN':
-                flag = 'TEXTBEGIN'
+            if parse_spacetext.matches(line):
+                flag = 'SPACETEXT'
                 continue
 
-            if flag != 'TEXTEND':
+            if flag != 'CONFIG':
                 if question:
                     question += '\n'
                 question += line
+                continue
 
-        return StepSpace(step_id, title, question, txt_space, space_number, answer)
+            if parse_caseless.matches(line):
+                st = parse_caseless.parseString(line)[0]
+                caseless = True if st == 'true' else False
+                continue
 
-    def __init__(self, step_id, title, question, txt_space, space_number, answer):
+            if parse_show_correct.matches(line):
+                st = parse_show_correct.parseString(line)[0]
+                show_correct = True if st == 'true' else False
+                continue
+
+            if parse_score_form.matches(line):
+                st = parse_score_form.parseString(line)[0]
+                score_formula = True if st == 'true' else False
+                continue
+
+            if parse_score.matches(line):
+                score = int(parse_score.parseString(line)[0])
+                continue
+
+        return StepSpace(step_id, title, question, txt_space, space_number,
+                         answer, caseless, show_correct, score_formula, score)
+
+    def __init__(self, step_id, title, question, txt_space, space_number,
+                 answer, caseless, show_correct, score_formula, score):
         super().__init__(step_id, title)
         self.question = question
         self.txt_space = txt_space
         self.space_number = space_number
         self.answer = answer
+        self.caseless = caseless
+        self.show_correct = show_correct
+        self.score_formula = score_formula
+        self.score = score
 
     def to_json(self):
         result = {
             "id": self.step_id,
             "title": self.title,
-            "type": "string",
+            "type": "space",
             "question": self.question,
             "text with space": self.txt_space,
             "space number": self.space_number,
-            "answer": self.answer
+            "answer": self.answer,
+            "caseless": self.caseless,
+            "show correct": self.show_correct,
+            "score formula": self.score_formula,
+            "score": self.score
         }
 
         return result
