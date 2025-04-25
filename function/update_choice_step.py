@@ -1,80 +1,53 @@
-import requests
-import re
-from requests.exceptions import HTTPError
+from classes import StepText, StepikAPI
 
-def convert_to_choice_step(step_url, question, options, correct_option_index, token):
+def update_step_content(step_url: str, new_content: str):
     """
-    Преобразует существующий текстовый шаг в шаг с выбором ответа
-    :param step_url: Полный URL шага (например, https://stepik.org/lesson/1635418/step/2)
-    :param question: Текст вопроса (HTML)
-    :param options: Список вариантов ответа
-    :param correct_option_index: Индекс правильного ответа (с 0)
-    :param token: API-токен
+    Обновляет содержимое текстового шага
+    
+    Args:
+        step_url: URL шага (например, "https://stepik.org/lesson/123/step/1")
+        new_content: Новое HTML-содержимое
     """
-    # Извлекаем ID урока и позицию шага
-    match = re.search(r'lesson/(\d+)/step/(\d+)', step_url)
-    if not match:
-        raise ValueError("Неверный формат URL шага")
+    token = StepikAPI.get_token()
     
-    lesson_id, step_pos = match.groups()
+    # Получаем текущий заголовок шага (можно изменить, если нужно)
+    current_title = "Теория"  # Или получить автоматически через API
     
-    headers = {
-        'Authorization': f'Bearer {token}',
-        'Content-Type': 'application/json'
-    }
+    updated_step = StepText(
+        step_id=0,  # ID будет получен из URL
+        title=current_title,
+        content=new_content
+    )
     
     try:
-        # 1. Получаем текущий шаг
-        response = requests.get(
-            f'https://stepik.org/api/step-sources?lesson={lesson_id}&position={step_pos}',
-            headers=headers
-        )
-        response.raise_for_status()
-        step_data = response.json()
-        
-        if not step_data['step-sources']:
-            raise ValueError("Шаг не найден")
-            
-        step_source = step_data['step-sources'][0]
-        
-        # 2. Формируем данные для преобразования в choice
-        update_data = {
-            'step-source': {
-                'id': step_source['id'],
-                'block': {
-                    'name': 'choice',  # Меняем тип на choice
-                    'text': question,
-                    'options': [
-                        {
-                            'text': text,
-                            'is_correct': (i == correct_option_index),
-                            'feedback': 'Верно!' if i == correct_option_index else 'Неверно',
-                            'hint': ''
-                        } for i, text in enumerate(options)
-                    ],
-                    'source': {'id': step_source['id']},
-                    'is_html_enabled': True,
-                    'is_multiple_choice': False,
-                    'sample_size': 0,
-                    'preserve_order': False
-                },
-                'lesson': int(lesson_id),
-                'position': int(step_pos)
-            }
-        }
-        
-        # 3. Отправляем обновление
-        response = requests.put(
-            f'https://stepik.org/api/step-sources/{step_source["id"]}',
-            json=update_data,
-            headers=headers
-        )
-        response.raise_for_status()
-        return response.json()
-        
-    except HTTPError as e:
-        print(f"Ошибка HTTP: {e.response.text if e.response else str(e)}")
-        return None
+        result = updated_step.update(step_url, token)
+        print(f"Шаг {step_url} успешно обновлен!")
+        return result
     except Exception as e:
-        print(f"Ошибка: {str(e)}")
+        print(f"Ошибка при обновлении: {str(e)}")
         return None
+
+if __name__ == "__main__":
+    # Теория в шаге 1
+    THEORY_STEP_URL = "https://stepik.org/lesson/1731206/step/2"  # Замените на ваш URL
+    
+    theory_content = """
+    <h2>Теория: Сложение чисел</h2>
+    <p>Сложение - это базовая математическая операция.</p>
+    
+    <h3>Основные понятия:</h3>
+    <ul>
+        <li><strong>Слагаемые</strong> - числа, которые складываются</li>
+        <li><strong>Сумма</strong> - результат сложения</li>
+    </ul>
+    
+    <h3>Пример:</h3>
+    <p>3 + 5 = 8</p>
+    <p>Где:
+        <br>3 - первое слагаемое
+        <br>5 - второе слагаемое
+        <br>8 - сумма
+    </p>
+    """
+    
+    update_step_content(THEORY_STEP_URL, theory_content)
