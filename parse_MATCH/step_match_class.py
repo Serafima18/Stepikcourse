@@ -16,6 +16,7 @@ class StepMatch(Step):
 
         flag = ''
         flag1: bool = True
+        tmp_ln: bool = False
 
         for line in lines:
             if flag == 'MATCH':
@@ -27,10 +28,20 @@ class StepMatch(Step):
 
                 if line.replace('—', '') == '':
                     flag1 = False
+                    tmp_ln = False
                     continue
 
                 if line.replace('=', '') == '':
                     flag1 = True
+                    tmp_ln = False
+                    continue
+
+                if tmp_ln:
+                    if flag1:
+                        ln_left[-1] += '\n' + line
+                    else:
+                        ln_right[-1] += '\n' + line
+
                     continue
 
                 if flag1:
@@ -38,6 +49,7 @@ class StepMatch(Step):
                 else:
                     ln_right.append(line)
 
+                tmp_ln = True
                 continue
 
             if parse_match.matches(line):
