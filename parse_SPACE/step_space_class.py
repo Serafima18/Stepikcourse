@@ -24,9 +24,9 @@ class StepSpace(Step):
         lines = [line for line in text.splitlines()]
         parse_spacetext = pp.Suppress('SPACETEXT')
         parse_config = pp.Suppress('CONFIG')
-        parse_caseless = pp.Suppress('CASELESS:') + (pp.CaselessKeyword('true') | pp.CaselessKeyword('false'))
-        parse_show_correct = pp.Suppress('SHOW_CORRECT:') + (pp.CaselessKeyword('true') | pp.CaselessKeyword('false'))
-        parse_score_form = pp.Suppress('SCORE_FORMULA:') + (pp.CaselessKeyword('true') | pp.CaselessKeyword('false'))
+        parse_caseless = pp.Suppress('CASELESS:') + (pp.CaselessLiteral('True') | pp.CaselessLiteral('False'))
+        parse_show_correct = pp.Suppress('SHOW_CORRECT:') + (pp.CaselessLiteral('True') | pp.CaselessLiteral('False'))
+        parse_score_form = pp.Suppress('SCORE_FORMULA:') + (pp.CaselessLiteral('True') | pp.CaselessLiteral('False'))
         parse_score = pp.Suppress('SCORE:') + pp.Word(pp.nums)
         parse_answer = pp.delimitedList(pp.Word(pp.alphanums + rus_alp + '@'), delim=';')
 
@@ -56,18 +56,18 @@ class StepSpace(Step):
                         n = space_number + i + 1
                         tmp = (parse_answer.parseString(ln[i])).asList()
 
-                        if '@' in ln[i]:
+                        if ';@' in ln[i]:
                             answer['space with choice'][n] = {'right ans': [], 'all ans': []}
 
-                            for j in range(len(tmp)):
-                                if not tmp[j]:
+                            for one_ans in tmp:
+                                if not one_ans:
                                     continue
 
-                                if tmp[j][0] == '@':
-                                    tmp[j] = tmp[j][1:]
-                                    answer['space with choice'][n]['right ans'].append(tmp[j])
+                                if one_ans[0] == '@':
+                                    one_ans = one_ans[1:]
+                                    answer['space with choice'][n]['right ans'].append(one_ans)
 
-                                answer['space with choice'][n]['all ans'].append(tmp[j])
+                                answer['space with choice'][n]['all ans'].append(one_ans)
                         else:
                             answer['space without'][n] = tmp
 
@@ -86,18 +86,15 @@ class StepSpace(Step):
                 continue
 
             if parse_caseless.matches(line):
-                st = parse_caseless.parseString(line)[0]
-                caseless = True if st == 'true' else False
+                caseless = parse_caseless.parseString(line)[0]
                 continue
 
             if parse_show_correct.matches(line):
-                st = parse_show_correct.parseString(line)[0]
-                show_correct = True if st == 'true' else False
+                show_correct = parse_show_correct.parseString(line)[0]
                 continue
 
             if parse_score_form.matches(line):
-                st = parse_score_form.parseString(line)[0]
-                score_formula = True if st == 'true' else False
+                score_formula = parse_score_form.parseString(line)[0]
                 continue
 
             if parse_score.matches(line):

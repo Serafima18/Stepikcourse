@@ -13,7 +13,7 @@ class StepQuiz(Step):
         lines = [line for line in text.splitlines()]
 
         parse_poss_ans = pp.Word(pp.alphas, exact=1) + pp.Suppress(pp.Word(').', exact=1)) + pp.SkipTo(pp.LineEnd())
-        parse_shuffle = pp.Suppress('SHUFFLE:') + pp.SkipTo(pp.LineEnd())
+        parse_shuffle = pp.Suppress('SHUFFLE:') + (pp.CaselessLiteral('True') | pp.CaselessLiteral('False'))
         parse_answer = pp.Suppress('ANSWER:') + pp.delimitedList(pp.Word(pp.alphas, exact=1))
 
         flag = ''
@@ -45,10 +45,7 @@ class StepQuiz(Step):
                         continue
 
             if parse_shuffle.matches(line):
-                sh = parse_shuffle.parseString(line)[0].strip().lower()
-                if sh not in ['true', 'false']:
-                    raise ValueError('Incorrect shuffle')
-                shuffle = False if sh == 'false' else 'true'
+                shuffle = parse_shuffle.parseString(line)[0]
                 continue
 
             if parse_answer.matches(line):
