@@ -8,10 +8,11 @@
 |      | вставка пропусков          | SPACE      |    |
 
 
-Скрипт|	Назначение |	Пример использования
-get_token.py	| Получение токена доступа	| python get_token.py
-create_lesson.py	| Создание нового урока	| python create_lesson.py --title "Новый урок"
-create_text_step.py	| Добавление текстового шага	| python create_text_step.py --lesson 123 --position 1
-update_step_text.py	| Обновление текстового шага	| python update_step_text.py --url https://stepik.org/lesson/123/step/1
-create_choice_step.py	| Создание шага с выбором	| python create_choice_step.py --lesson 123 --position 2
-update_choice_step.py	| Обновление шага с выбором	| python update_choice_step.py --url https://stepik.org/lesson/123/step/2
+1) Для получения данных client_id и client_secret для курса используем ссылку: https://stepik.org/oauth2/applications/
+2) get_token.py для получения токена
+3) create_lesson.py для создания урока
+4) create_text_step.py для создания текстового шага
+5) update_step_text.py для обновления текстового шага
+6) create_choice_step.py для создания шага текстовая задача
+7) update_choice_step.py для обновления шага текстовая задача
+Все пункты 2-7 файлы лежат в папке function
