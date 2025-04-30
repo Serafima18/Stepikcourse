@@ -2,21 +2,19 @@ from step_classes import Step
 import pyparsing as pp
 
 
-class StepMatch(Step):
+class StepMatching(Step):
     @classmethod
     def parse(cls, step_id, title, text, step_type=None):
         question = ""
-        ln_left = []
-        ln_right = []
-        answer = {}
+        pairs = []
 
         lines = [line for line in text.splitlines()]
         parse_match = pp.Suppress('MATCH')
-        parse_answer = pp.Suppress("ANSWER:") + pp.delimitedList(pp.Word(pp.nums + '-'))
 
         flag = ''
         flag1: bool = True
         tmp_ln: bool = False
+        pair = {'first': '', 'second': ''}
 
         for line in lines:
             if flag == 'MATCH':
@@ -32,22 +30,25 @@ class StepMatch(Step):
                     continue
 
                 if line.replace('=', '') == '':
+                    pairs.append(pair)
+                    pair = {'first': '', 'second': ''}
+
                     flag1 = True
                     tmp_ln = False
                     continue
 
                 if tmp_ln:
                     if flag1:
-                        ln_left[-1] += '\n' + line
+                        pair['first'] += '\n' + line
                     else:
-                        ln_right[-1] += '\n' + line
+                        pair['second'] += '\n' + line
 
                     continue
 
                 if flag1:
-                    ln_left.append(line)
+                    pair['first'] += line
                 else:
-                    ln_right.append(line)
+                    pair['second'] += line
 
                 tmp_ln = True
                 continue
@@ -61,31 +62,20 @@ class StepMatch(Step):
                     question += '\n'
                 question += line
 
-            if parse_answer.matches(line):
-                answer_result = parse_answer.parseString(line)
+        return StepMatching(step_id, title, question, pairs)
 
-                for ans in answer_result.asList():
-                    i = ans.index('-')
-                    answer[int(ans[:i])] = int(ans[i + 1:])
-
-        return StepMatch(step_id, title, question, ln_left, ln_right, answer)
-
-    def __init__(self, step_id, title, question, ln_left, ln_right, answer):
+    def __init__(self, step_id, title, question, pairs):
         super().__init__(step_id, title)
         self.question = question
-        self.ln_left = ln_left
-        self.ln_right = ln_right
-        self.answer = answer
+        self.pairs = pairs
 
     def to_json(self):
         result = {
             "id": self.step_id,
             "title": self.title,
-            "type": "string",
+            "type": "matching",
             "question": self.question,
-            "left lines": self.ln_left,
-            "right lines": self.ln_right,
-            "answer": self.answer
+            "pairs": self.pairs
         }
 
         return result
@@ -96,9 +86,5 @@ class StepMatch(Step):
         """
         if not self.question:
             raise ValueError("Question must not be empty.")
-        if not self.ln_left:
-            raise ValueError("Left lines must not be empty")
-        if not self.ln_right:
-            raise ValueError("Right lines must not be empty")
-        if not self.answer:
-            raise ValueError("Answer must not be empty.")
+        if not self.pairs:
+            raise ValueError("Pairs must not be empty")

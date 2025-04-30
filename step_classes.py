@@ -29,9 +29,9 @@ class Step:
         from parse_STRING.step_string_class import StepString
         from parse_QUIZ.step_quiz_class import StepQuiz
         from parse_SPACE.step_space_class import StepSpace
-        from parse_MATCH.step_match_class import StepMatch
+        from parse_MATCH.step_match_class import StepMatching
 
-        if step_type not in ['TEXT', 'STRING', 'NUMBER', 'QUIZ', 'SPACE', 'MATCH']:
+        if step_type not in ['TEXT', 'STRING', 'NUMBER', 'QUIZ', 'SPACE', 'MATCHING']:
             raise NotImplemented("Incorrect step type")
         match step_type:
             case 'TEXT':
@@ -44,8 +44,8 @@ class Step:
                 return StepQuiz.parse(step_id, title, text)
             case 'SPACE':
                 return StepSpace.parse(step_id, title, text)
-            case 'MATCH':
-                return StepMatch.parse(step_id, title, text)
+            case 'MATCHING':
+                return StepMatching.parse(step_id, title, text)
 
     def update(self, step_position):
         """Обновляет шаг на степике."""
@@ -58,6 +58,7 @@ class Step:
     def remove(self, step_position):
         """Удаляет шаг на степике."""
         pass
+
 
 class StepText(Step):
     """
