@@ -1,11 +1,11 @@
 {# ОБРАЩЕНИЕ К СЛОВАРЮ, ЕСЛИ КЛЮЧ: СТРОКА - ЧЕРЕЗ . ЧИСЛО - ЧЕРЕЗ []!!!! #}
 <details>
-    <summary><big><big>{{ section_name }}</big></big>
+    <summary id="{{section_name}}"><big><big>{{ section_name }}</big></big>
     </summary>
     <table class="course-grade-book-table__table">
 
         <tr>
-            <th colspan="2" rowspan="2" style="text-align: center;"> Ученики </th>
+            <th colspan="2" rowspan="3" style="text-align: center;"> Ученики </th>
         </tr>
 
 
@@ -18,9 +18,6 @@
         </tr>
 
         <tr>
-            {# "id"  и "имя" #}
-            <th style="text-align: center;"> Id </th>
-            <th style="text-align: center;"> Имя </th>
 
             {# Выводим названия и id шагов #}
             {% for lesson_id in sections[section_id].lessons %} {% for step_id in lessons[lesson_id].steps %}
@@ -36,16 +33,16 @@
             <td><a href="https://stepik.org/users/{{student_id}}/profile"  target="_blank">{{ students[student_id] }}</a></td>
             {% for lesson_id in sections[section_id].lessons %}
                 {% for step_id in lessons[lesson_id].steps %}
-                    {% if step_id in grades[student_id] and grades[student_id][step_id] != 0 and grades[student_id][step_id] != None and steps[step_id]['block_type'] != "text" %}
+                    {% if step_id in grades[student_id] and grades[student_id][step_id] != 0 and grades[student_id][step_id] != None and steps[step_id]['worth'] %}
                         <td class="gradesheet-cell" data-index="0" data-is-passed="" data-is-success="">
                             <a href="https://stepik.org/submissions/{{step_id}}?search=id:{{student_id}}&klass={{class_id}}"  target="_blank"  style="color: black;">
                             {{ grades[student_id][step_id] }}</a></td>
-                    {% elif step_id in grades[student_id] and grades[student_id][step_id] == 0 and steps[step_id]['block_type'] != "text" %}
+                    {% elif step_id in grades[student_id] and grades[student_id][step_id] == 0 and steps[step_id]['worth'] %}
                         <td class="gradesheet-cell" data-index="0" data-is-passed="" data-is-success="" title="Есть только неверные решения">
                             <a href="https://stepik.org/submissions/{{step_id}}?search=id:{{student_id}}&klass={{class_id}}"  target="_blank"  style="color: black;">
                                 0</a></td>
                     {% else %}
-                        <td class="gradesheet-cell" data-index="0" data-is-passed="" data-is-success="" title="Нет отправленных решений">-</td>
+                        <td class="gradesheet-cell" data-index="0" data-is-passed="" data-is-success="" title="Нет отправленных решений" style="color: black;">-</td>
                     {% endif %}
                 {% endfor %}
             {% endfor %}

@@ -146,7 +146,8 @@ class CourseData(StepikAPIClient):
             'id': int(step['id']),
             'lesson_id': step['lesson'],
             'position': step['position'],
-            'block_type': step['block']['name']
+            'block_type': step['block']['name'],
+            'worth': step['worth']
         }
 
     # def export_to_csv(self, filename: str = None) -> None:
@@ -229,7 +230,7 @@ class GradeBook(StepikAPIClient):
                     int(grade['step_id']): (
                         0 if not grade['is_passed'] and grade['total_submissions'] != 0
                         else None if grade['total_submissions'] == 0
-                        else grade['score']
+                        else int(grade['score'])
                     )
                     for _, grade in student_grade['results'].items()
                 }

@@ -5,33 +5,28 @@
         <tr>
             <th colspan="2" rowspan="1" style="text-align: center;"> Ученики </th>
             {# Total sum of grades #}
-            <th rowspan="2" style="text-align: center;">
+            <th rowspan="1" style="text-align: center;">
                 Всего </th>
             {# Выводим названия и id уроков #}
             {% for section_id in sections_ids %}
-            <th rowspan="2" style="text-align: center;">
-                {{ sections[section_id].title }}({{ section_id }})</th>
+            <th rowspan="1" style="text-align: center;"><a href="#{{sections[section_id].title}}">
+                {{ sections[section_id].title }}({{ section_id }})</a></th>
             {% endfor %}
         </tr>
 
-        <tr>
-            {# "id"  и "имя" #}
-            <th style="text-align: center;"> Id </th>
-            <th style="text-align: center;"> Имя </th>
-        </tr>
 
         {# Выводим оценки студентов #}
         {% for student_id in students %}
         <tr>
             <td>{{ student_id }}</td>
-            <td><a href="https://stepik.org/users/{{student_id}}/profile"  target="_blank">{{ students[student_id] }}</a></td>
-            <td class="gradesheet-cell" data-index="0" data-is-passed="" data-is-success="">
+            <td><a href="https://stepik.org/users/{{student_id}}/profile"  target="_blank" >{{ students[student_id] }}</a></td>
+            <td class="gradesheet-cell" data-index="0" data-is-passed="" data-is-success="" style="color: black;">
                 {{ module_grades[student_id]['total_sum'] }}</td>
             {# Считаем сумму всех оценок по всем модулям #}
             {% set sections_ids = data['course']['sections'] %}
             {% set lessons = data['lessons'] %}
             {% for id in sections_ids %}
-            <td class="gradesheet-cell" data-index="0" data-is-passed="" data-is-success="">
+            <td class="gradesheet-cell" data-index="0" data-is-passed="" data-is-success="" style="color: black;">
                 {{ module_grades[student_id][id] }}</td>
             {% endfor %}
         </tr>
