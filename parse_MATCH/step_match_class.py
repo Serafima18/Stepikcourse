@@ -4,7 +4,7 @@ import pyparsing as pp
 
 class StepMatching(Step):
     @classmethod
-    def parse(cls, step_id, title, text, step_type=None):
+    def parse(cls, step_id, title, text, step_type='MATCHING'):
         question = ''
         pairs = []
         empty_pair = {'first': '', 'second': ''}

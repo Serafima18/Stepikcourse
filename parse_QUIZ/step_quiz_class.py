@@ -4,11 +4,11 @@ import pyparsing as pp
 
 class StepQuiz(Step):
     @classmethod
-    def parse(cls, step_id, title, text, step_type=None):
+    def parse(cls, step_id, title, text, step_type='QUIZ'):
         question = ""
         possible_answers = {}
-        shuffle = True
-        answer = []
+        shuffle: bool = True
+        answer: list = []
 
         lines = [line for line in text.splitlines()]
 
@@ -45,14 +45,14 @@ class StepQuiz(Step):
                         continue
 
             if parse_shuffle.matches(line):
-                shuffle = parse_shuffle.parseString(line)[0]
+                shuffle = (True if parse_shuffle.parseString(line)[0] == 'True' else False)
                 continue
 
             if parse_answer.matches(line):
                 parse_tmp = pp.Suppress("ANSWER:") + pp.SkipTo(pp.LineEnd())
                 line = "ANSWER: " + parse_tmp.parseString(line)[0].replace(' ', '')
                 answer_res = parse_answer.parseString(line)
-                answer.append(answer_res.asList())
+                answer = answer_res.asList()
                 continue
 
             if tmp:

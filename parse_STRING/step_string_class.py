@@ -8,12 +8,14 @@ class StepString(Step):
     """
 
     @classmethod
-    def parse(cls, step_id, title, text, step_type=None):
+    def parse(cls, step_id, title, text, step_type='STRING'):
         question = ""
-        answer = []
+        answer: str = ''
+        regexp = None
 
         lines = [line for line in text.splitlines()]
         parse_answer = pp.Suppress("ANSWER:") + pp.SkipTo(pp.LineEnd())
+        parse_regexp = pp.Suppress("REGEX:") + pp.SkipTo(pp.LineEnd())
 
         for line in lines:
             if not answer:
@@ -23,16 +25,18 @@ class StepString(Step):
                     question += line
 
             if parse_answer.matches(line):
-                answer_result = parse_answer.parseString(line)
-                answer.append(answer_result[0].strip().lower())
+                answer = parse_answer.parseString(line)[0]
 
-        return StepString(step_id, title, question, answer)
+            if parse_regexp.matches(line):
+                regexp = parse_regexp.parseString(line)[0]
+
+        return StepString(step_id, title, question, answer, regexp)
 
     def __init__(self, step_id, title, question, answer, regexp=None):
         super().__init__(step_id, title)
         self.question = question
         self.answer = answer
-        self.regexp = regexp       # Регулярное выражение для проверки ответа
+        self.regexp = regexp
 
     def to_json(self):
         result = {
@@ -44,7 +48,7 @@ class StepString(Step):
         }
 
         if self.regexp:
-            result["regexp"] = self.regexp  # Добавляем регулярное выражение, если есть
+            result["regexp"] = self.regexp
         return result
 
     def validate(self):

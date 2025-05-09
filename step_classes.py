@@ -25,7 +25,7 @@ class Step:
         raise NotImplementedError("Subclasses should implement this!")
 
     @classmethod
-    def parse(cls, step_id, title, text, step_type=None):
+    def parse(cls, step_id, title, text, step_type='TEXT'):
         from parse_STRING.step_string_class import StepString
         from parse_QUIZ.step_quiz_class import StepQuiz
         from parse_SPACE.step_space_class import StepSpace
