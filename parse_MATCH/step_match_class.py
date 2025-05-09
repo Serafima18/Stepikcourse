@@ -5,62 +5,49 @@ import pyparsing as pp
 class StepMatching(Step):
     @classmethod
     def parse(cls, step_id, title, text, step_type=None):
-        question = ""
+        question = ''
         pairs = []
+        empty_pair = {'first': '', 'second': ''}
+        pair = empty_pair.copy()
 
         lines = [line for line in text.splitlines()]
         parse_match = pp.Suppress('MATCH')
+        parse_first_end = pp.Word('-', min=4)
+        parse_second_end = pp.Word('=', min=4)
 
-        flag = ''
-        flag1: bool = True
-        tmp_ln: bool = False
-        pair = {'first': '', 'second': ''}
+        state = 'BEGIN'
 
         for line in lines:
-            if flag == 'MATCH':
-                line = line.strip()
+            match state:
+                case 'BEGIN':
+                    if parse_match.matches(line):
+                        state = 'FIRST'
+                        continue
 
-                if not line:
-                    flag = 'END'
-                    continue
+                    if question:
+                        question += '\n'
 
-                if line.replace('—', '') == '':
-                    flag1 = False
-                    tmp_ln = False
-                    continue
+                    question += line
+                case 'FIRST':
+                    if parse_first_end.matches(line):
+                        state = 'SECOND'
+                        continue
 
-                if line.replace('=', '') == '':
-                    pairs.append(pair)
-                    pair = {'first': '', 'second': ''}
+                    if pair['first']:
+                        pair['first'] += '\n'
 
-                    flag1 = True
-                    tmp_ln = False
-                    continue
-
-                if tmp_ln:
-                    if flag1:
-                        pair['first'] += '\n' + line
-                    else:
-                        pair['second'] += '\n' + line
-
-                    continue
-
-                if flag1:
                     pair['first'] += line
-                else:
+                case 'SECOND':
+                    if parse_second_end.matches(line):
+                        state = 'FIRST'
+                        pairs.append(pair)
+                        pair = empty_pair.copy()
+                        continue
+
+                    if pair['second']:
+                        pair['second'] += '\n'
+
                     pair['second'] += line
-
-                tmp_ln = True
-                continue
-
-            if parse_match.matches(line):
-                flag = 'MATCH'
-                continue
-
-            if flag != 'END':
-                if question:
-                    question += '\n'
-                question += line
 
         return StepMatching(step_id, title, question, pairs)
 
