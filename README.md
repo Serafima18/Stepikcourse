@@ -8,11 +8,5 @@
 |      | вставка пропусков          | SPACE      |    |
 
 
-1) Для получения данных client_id и client_secret для курса используем ссылку: https://stepik.org/oauth2/applications/
-2) get_token.py для получения токена
-3) create_lesson.py для создания урока
-4) create_text_step.py для создания текстового шага
-5) update_step_text.py для обновления текстового шага
-6) create_choice_step.py для создания шага текстовая задача
-7) update_choice_step.py для обновления шага текстовая задача
-Все пункты 2-7 файлы лежат в папке function
+1) Для получения данных client_id и client_secret для курса используем ссылку: https://stepik.org/oauth2/applications/. Данный которые мы получили заносим в файл creds.yaml
+2) Запускаем файл stepik_tools.py
