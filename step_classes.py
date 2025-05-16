@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List
 from dataclasses import dataclass, field
 
+
 class Step:
     """
     Базовый класс для всех шагов.
@@ -116,17 +117,28 @@ class Step:
 
     @classmethod
     def parse(cls, step_id, title, text, step_type='TEXT'):
+        from parse_STRING.step_string_class import StepString
+        from parse_QUIZ.step_quiz_class import StepQuiz
+        from parse_SPACE.step_space_class import StepSpace
+        from parse_MATCH.step_match_class import StepMatching
+
         if step_type not in ['TEXT', 'STRING', 'NUMBER', 'QUIZ', 'SPACE', 'MATCHING']:
             raise NotImplementedError("Incorrect step type")
-        
-        if step_type == 'TEXT':
-            return StepText(step_id, title, text)
-        elif step_type == 'STRING':
-            return StepString(step_id, title, text)
-        elif step_type == 'NUMBER':
-            return StepNumber(step_id, title, text)
-        else:
-            raise NotImplementedError(f"Step type {step_type} not implemented")
+
+        match step_type:
+            case 'TEXT':
+                return StepText.parse(step_id, title, text)
+            case 'STRING':
+                return StepString.parse(step_id, title, text)
+            case 'NUMBER':
+                return StepNumber.parse(step_id, title, text)
+            case 'QUIZ':
+                return StepQuiz.parse(step_id, title, text)
+            case 'SPACE':
+                return StepSpace.parse(step_id, title, text)
+            case 'MATCHING':
+                return StepMatching.parse(step_id, title, text)
+
 
 class StepText(Step):
     def __init__(self, step_id: int, title: str, content: str):
@@ -143,6 +155,7 @@ class StepText(Step):
     def validate(self) -> None:
         if not self.content:
             raise ValueError("Content must not be empty.")
+
 
 class StepNumber(Step):
     def __init__(self, step_id: int, title: str, question: str, answer: float, tolerance: float = 0):
@@ -164,6 +177,7 @@ class StepNumber(Step):
             raise ValueError("Answer must not be None.")
         if self.tolerance < 0:
             raise ValueError("Tolerance must not be negative.")
+
 
 class StepString(Step):
     def __init__(self, step_id: int, title: str, question: str, answer: str, regexp: str = None):
@@ -190,6 +204,7 @@ class StepString(Step):
             raise ValueError("Answer must not be empty.")
         if self.regexp and not isinstance(self.regexp, str):
             raise ValueError("Regexp must be a string if provided.")
+
 
 class StepikAPI:
     @staticmethod
