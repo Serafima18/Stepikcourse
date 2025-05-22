@@ -76,7 +76,11 @@ class Step:
         response.raise_for_status()
         return response.json()
 
+    def update_json(self):
+        pass
+
     def update(self, step_url: str, token: str) -> dict:
+        self.update_json()
         step_source = self.get_step_source(step_url, token)
         lesson_id, step_pos = self._get_lesson_and_position(step_url)
         
