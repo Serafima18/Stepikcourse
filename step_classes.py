@@ -60,21 +60,24 @@ class Step:
             'Authorization': f'Bearer {token}',
             'Content-Type': 'application/json'
         }
-        
+
         data = {
             'step-source': {
-                'block': self.to_json(),
+                'block': self.to_json(),  # Важно: теперь это будет правильный формат для QUIZ
                 'lesson': lesson_id,
                 'position': position
             }
         }
-        
+
         response = requests.post(
             'https://stepik.org/api/step-sources',
             json=data,
             headers=headers
         )
-        response.raise_for_status()
+
+        if response.status_code != 201:
+            raise Exception(f"Ошибка при создании шага: {response.status_code} {response.text}")
+
         return response.json()
 
     def update_json(self):
@@ -123,32 +126,35 @@ class Step:
 
     @classmethod
     def parse(cls, step_id, title, text, step_type='TEXT'):
+        # Подключаем шаги из правильных модулей
         from parse_STRING.step_string_class import StepString
         from parse_QUIZ.step_quiz_class import StepQuiz
         from parse_SPACE.step_space_class import StepSpace
         from parse_MATCH.step_match_class import StepMatching
         from parse_NUMBER.step_number_class import StepNumber
         from parse_TASKINLINE.step_taskinline_class import StepTaskinline
+        from h1_h2_steps.h1_h2_steps import parse_text
 
-        if step_type not in ['TEXT', 'STRING', 'NUMBER', 'QUIZ', 'SPACE', 'MATCHING', 'TASKINLINE']:
-            raise NotImplementedError("Incorrect step type")
+        # Маппинг шагов с типами
+        step_classes = {
+            'TEXT': StepText,
+            'STRING': StepString,
+            'NUMBER': StepNumber,
+            'QUIZ': StepQuiz,  # Обработчик для QUIZ
+            'SPACE': StepSpace,
+            'MATCHING': StepMatching,
+            'TASKINLINE': StepTaskinline
+        }
 
-        match step_type:
-            case 'TEXT':
-                return StepText.parse(step_id, title, text)
-            case 'STRING':
-                return StepString.parse(step_id, title, text)
-            case 'NUMBER':
-                return StepNumber.parse(step_id, title, text)
-            case 'QUIZ':
-                return StepQuiz.parse(step_id, title, text)
-            case 'SPACE':
-                return StepSpace.parse(step_id, title, text)
-            case 'MATCHING':
-                return StepMatching.parse(step_id, title, text)
-            case 'TASKINLINE':
-                return StepTaskinline.parse(step_id, title, text)
+        # Проверяем, что шаг существует в маппинге
+        if step_type not in step_classes:
+            raise NotImplementedError(f"Step type '{step_type}' is not implemented")
 
+        # Получаем класс для шага
+        step_class = step_classes[step_type]
+
+        # Вызываем метод parse() для соответствующего класса
+        return step_class.parse(step_id, title, text)
 
 class StepText(Step):
     def __init__(self, step_id: int, title: str, text: str):

@@ -265,7 +265,7 @@ class StepikCourseTools:
     def _handle_add_step_to_lesson(self):
         try:
             print("Выберите тип шага:")
-            step_types = ["TEXT", "MATCH", "NUMBER", "QUIZ", "SPACE", "STRING"]
+            step_types = ["TEXT", "MATCHING", "NUMBER", "QUIZ", "SPACE", "STRING"]
             for idx, t in enumerate(step_types, 1):
                 print(f"{idx}. {t}")
             step_choice = int(input("Введите номер типа шага: "))
