@@ -96,6 +96,7 @@ if __name__ == '__main__':
         #  Загружаем и подставляем шаблон
         environment = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
         template = environment.get_template(TABLE_TEMPLATE)
+        print('OK')
         content = template.render(
             data=course_data.data,
             students=students_dict,

@@ -2,6 +2,7 @@
 <div style="padding: 15px;">
     <table class="course-grade-book-table__table">
 
+    <thead>
         <tr>
             <th colspan="2" rowspan="1" style="text-align: center;"> Ученики </th>
             {# Total sum of grades #}
@@ -13,6 +14,7 @@
                 {{ sections[section_id].title }}({{ section_id }})</a></th>
             {% endfor %}
         </tr>
+    </thead>
 
 
         {# Выводим оценки студентов #}

@@ -2,9 +2,9 @@
 import requests
 from typing import List, Dict
 from requests.exceptions import RequestException, JSONDecodeError
+import abc
 
-
-class StepikAPIClient:
+class StepikAPIClient(abc.ABC):
     """Базовый класс для работы с Stepik API."""
     API_HOST = 'https://stepik.org'
 

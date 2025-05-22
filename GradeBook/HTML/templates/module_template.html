@@ -4,8 +4,10 @@
     </summary>
     <table class="course-grade-book-table__table">
 
+    <thead>
+    
         <tr>
-            <th colspan="2" rowspan="3" style="text-align: center;"> Ученики </th>
+            <th colspan="2" rowspan="2" style="text-align: center;"> Ученики </th>
         </tr>
 
 
@@ -20,10 +22,14 @@
         <tr>
 
             {# Выводим названия и id шагов #}
+            <td></td>
+            <td></td>
             {% for lesson_id in sections[section_id].lessons %} {% for step_id in lessons[lesson_id].steps %}
             <td>S{{ loop.index }}</td>
             {% endfor %} {% endfor %}
         </tr>
+    </thead>
+
 
 
         {# Выводим оценки студентов #}
