@@ -86,7 +86,8 @@ class Lesson:
     
     def add_to_course(self, course_id: int, token: str, section_id: int = None, position: int = 1) -> dict:
         """
-        Добавляет урок в указанный курс через API units
+        Добавляет урок в указанный курс через API units.
+        Если секций в курсе нет — автоматически создаёт секцию.
         """
         if not self.lesson_id:
             raise ValueError("Lesson ID is not set. Create lesson first.")
@@ -96,7 +97,7 @@ class Lesson:
             'Content-Type': 'application/json'
         }
         
-        # Сначала получаем первую секцию курса, если section_id не указан
+        # Получаем первую секцию курса или создаём новую, если её нет
         if section_id is None:
             sections_response = requests.get(
                 f'https://stepik.org/api/sections?course={course_id}',
@@ -106,9 +107,24 @@ class Lesson:
             sections = sections_response.json().get('sections', [])
             
             if not sections:
-                raise ValueError(f"В курсе {course_id} нет секций")
-                
-            section_id = sections[0]['id']
+                print(f"⚠️ В курсе {course_id} нет секций. Создаю секцию 'Автосекция'...")
+                section_data = {
+                    "section": {
+                        "course": course_id,
+                        "title": "Автосекция",
+                        "position": 1
+                    }
+                }
+                create_section_response = requests.post(
+                    'https://stepik.org/api/sections',
+                    json=section_data,
+                    headers=headers
+                )
+                create_section_response.raise_for_status()
+                section_id = create_section_response.json()["sections"][0]["id"]
+                print(f"✅ Секция создана с ID {section_id}")
+            else:
+                section_id = sections[0]['id']
         
         # Создаем unit (связь между уроком и секцией курса)
         data = {

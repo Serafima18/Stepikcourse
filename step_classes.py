@@ -161,6 +161,9 @@ class StepText(Step):
         if not self.text:
             raise ValueError("Content must not be empty.")
 
+    @classmethod
+    def parse(cls, step_id, title, text):
+        return cls(step_id, title, text)
 
 class StepNumber(Step):
     def __init__(self, step_id: int, title: str, question: str, answer: float, tolerance: float = 0):
@@ -182,6 +185,21 @@ class StepNumber(Step):
             raise ValueError("Answer must not be None.")
         if self.tolerance < 0:
             raise ValueError("Tolerance must not be negative.")
+
+    @classmethod
+    def parse(cls, step_id, title, text):
+        # Попробуем извлечь answer из текста (если он в виде "ANSWER: число ± допуск")
+        import re
+        match = re.search(r"ANSWER:\s*([-\d.]+)\s*[±+−]\s*([\d.]+)", text)
+        if match:
+            question = text.strip()
+            answer = float(match.group(1))
+            tolerance = float(match.group(2))
+        else:
+            raise ValueError("Не удалось разобрать численный ответ из текста")
+
+        return cls(step_id, title, question, answer, tolerance)
+
 
 
 class StepikAPI:

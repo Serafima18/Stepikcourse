@@ -1,4 +1,5 @@
 from step_classes import Step
+from markdown import markdown
 
 text = '''
 Some question
@@ -16,7 +17,7 @@ step_test = Step.parse(1, 'title', text, 'SPACE')
 
 
 def test_parse_space2_question():
-    assert step_test.text == 'Some question'
+    assert step_test.text == markdown('Some question')
 
 
 def test_parse_space2_txt_space():
