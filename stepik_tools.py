@@ -91,9 +91,11 @@ class StepikCourseTools:
             lesson_data = parse_text(text)
 
             lesson_id = lesson_data.get("lesson_id")
+            lesson_id = int(lesson_id)  # Преобразуем строку в число
+
             steps_raw = lesson_data.get("steps", [])
             if not lesson_id:
-                raise ValueError("В Markdown-файле должен быть указан lesson_id")
+                raise ValueError("В Markdown-файле должен быть указан lesson_id для обновления урока.")
 
             lesson = Lesson(lesson_id=int(lesson_id))
 
@@ -101,11 +103,10 @@ class StepikCourseTools:
                 step = Step.parse(idx, step_data['header'], step_data['text'], step_data['type'])
                 lesson.steps.append(step)
 
-            # Привязать урок к курсу, создать секцию если надо (НО НЕ ОБНОВЛЯТЬ урок)
             lesson.add_to_course(self.course_id, self.token)
             print(f"Урок {lesson.lesson_id} добавлен в курс {self.course_id}")
 
-            # Получить текущее количество шагов в уроке
+            # Получение существующих шагов
             response = requests.get(
                 f'https://stepik.org/api/lessons/{lesson.lesson_id}',
                 headers={
@@ -118,7 +119,7 @@ class StepikCourseTools:
 
             print(f"Существующих шагов: {existing_steps_count}")
 
-            # Добавляем только новые шаги
+            # Добавляем шаги
             for idx, step in enumerate(lesson.steps, start=1):
                 step_url = f"https://stepik.org/lesson/{lesson.lesson_id}/step/{idx}"
                 try:
@@ -127,8 +128,6 @@ class StepikCourseTools:
                     print(f"🔁 Шаг {idx} обновлён")
                 except Exception as e:
                     print(f"❌ Ошибка при обновлении шага {idx}: {e}")
-                except Exception as create_err:
-                    print(f"❌ Ошибка при создании шага {idx}: {create_err}")
 
         except Exception as e:
             print(f"Ошибка при загрузке и публикации урока: {e}")
