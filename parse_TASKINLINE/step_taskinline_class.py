@@ -169,10 +169,6 @@ class StepTaskinline(Step):
             "additional_params": self.config["additional_params"]
         }
 
-        if self.regexp:
-            result["regexp"] = self.regexp
-        return result
-
     def validate(self):
         """
         Проверяет, что все необходимые атрибуты заданы корректно.
