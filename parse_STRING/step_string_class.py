@@ -41,7 +41,7 @@ class StepString(Step):
         result = {
             "id": self.step_id,
             "title": self.title,
-            "type": "string",
+            "name": "string",
             "text": self.text,
             "answer": self.answer
         }

@@ -119,7 +119,7 @@ class StepSpace(Step):
         result = {
             "id": self.step_id,
             "title": self.title,
-            "type": "space",
+            "name": "space",
             "text": self.text,
             "text with space": self.txt_space,
             "space number": self.space_number,
