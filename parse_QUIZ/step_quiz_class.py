@@ -75,10 +75,10 @@ class StepQuiz(Step):
 
     def to_json(self):
         block = {
-            "name": "quiz",
+            "name": "choice",
             "text": self.text,
-            "source": {
-                "options": self.possible_answers,
+            "options": {
+                "choices": self.possible_answers,
                 "is_multiple_choice": self.is_mlt,
                 "is_html_enabled": True,
                 "shuffle": self.shuffle
