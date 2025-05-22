@@ -263,6 +263,74 @@ class StepikCourseTools:
         else:
             self.create_new_lesson_from_markdown(selected_path)
 
+    def _handle_add_step_to_lesson(self):
+        try:
+            print("Выберите тип шага:")
+            step_types = ["TEXT", "MATCH", "NUMBER", "QUIZ", "SPACE", "STRING"]
+            for idx, t in enumerate(step_types, 1):
+                print(f"{idx}. {t}")
+            step_choice = int(input("Введите номер типа шага: "))
+            if step_choice < 1 or step_choice > len(step_types):
+                print("❌ Неверный выбор типа")
+                return
+            step_type = step_types[step_choice - 1]
+
+            folder = Path("example")
+            md_files = list(folder.glob("*.md"))
+            if not md_files:
+                print("В папке example нет .md файлов")
+                return
+
+            print("Доступные .md файлы:")
+            for idx, f in enumerate(md_files, 1):
+                print(f"{idx}. {f.name}")
+            file_name = input("Введите имя файла (например, string.md): ")
+            selected_path = folder / file_name
+            if not selected_path.exists():
+                print("Файл не найден")
+                return
+
+            with open(selected_path, 'r', encoding='utf-8') as f:
+                text = f.read()
+
+            parsed = parse_text(text)
+            lesson_id = parsed.get("lesson_id")
+            if not lesson_id:
+                print("❌ В файле должен быть указан lesson_id")
+                return
+            steps = parsed.get("steps", [])
+            if not steps:
+                print("❌ В файле не найден шаг")
+                return
+
+            # Определяем позицию — добавляем в конец
+            headers = {
+                'Authorization': f'Bearer {self.token}',
+                'Content-Type': 'application/json'
+            }
+            response = requests.get(
+                f'https://stepik.org/api/lessons/{lesson_id}',
+                headers=headers
+            )
+            response.raise_for_status()
+            step_count = len(response.json()['lessons'][0].get('steps', []))
+            position = step_count + 1
+
+            step_data = steps[0]
+            step = Step.parse(
+                step_id=0,
+                title=step_data['header'],
+                text=step_data['text'],
+                step_type=step_type
+            )
+
+            step.create(lesson_id, position, self.token)
+            print(f"✅ Шаг типа {step_type} добавлен в урок {lesson_id} в позицию {position}")
+
+        except Exception as e:
+            print(f"🚫 Ошибка при создании шага: {e}")
+
+
     def interactive_dialog(self):
         print("=== Stepik Tools ===")
 
@@ -287,8 +355,9 @@ class StepikCourseTools:
             print("3. Удалить шаг из урока")
             print("4. Обновить шаг в уроке (из Markdown)")
             print("5. Выход")
+            print("6. ➕ Добавить шаг в существующий урок")
 
-            choice = input("Выберите действие (1-5): ")
+            choice = input("Выберите действие (1-6): ")
 
             if choice == '1':
                 self._handle_lesson_upload(update_existing=True)
@@ -319,6 +388,10 @@ class StepikCourseTools:
             elif choice == '5':
                 print("Завершение работы")
                 break
+            
+            elif choice == '6':
+                self._handle_add_step_to_lesson()
+
 
             else:
                 print("Некорректный выбор")
