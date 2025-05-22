@@ -79,39 +79,52 @@ class StepikCourseTools:
         if not self.course_id:
             print("Сначала укажите ID курса")
             return
+
         try:
             import requests
-            from step_classes import StepText
-            from step_classes import StepikAPI
+            from step_classes import StepText, StepikAPI
+
             with open(file_path, 'r', encoding='utf-8') as f:
                 text = f.read()
+
             lesson_data = parse_text(text)
 
             lesson_id = lesson_data.get("lesson_id")
             steps_raw = lesson_data.get("steps", [])
             if not lesson_id:
-                raise ValueError("В Markdown-файле должен быть указан существующий lesson_id для обновления урока.")
+                raise ValueError("В Markdown-файле должен быть указан lesson_id")
+            
             lesson = Lesson(lesson_id=int(lesson_id))
 
             for idx, step_data in enumerate(steps_raw, start=1):
                 step = Step.parse(idx, step_data['header'], step_data['text'], step_data['type'])
                 lesson.steps.append(step)
 
-            # Удалено создание нового урока — только обновление существующего
-            else:
-                lesson.update(self.token)
-                print(f"Урок с ID {lesson.lesson_id} обновлён")
-
+            # Привязать урок к курсу, создать секцию если надо (НО НЕ ОБНОВЛЯТЬ урок)
             lesson.add_to_course(self.course_id, self.token)
-            print(f"Урок добавлен в курс {self.course_id}")
+            print(f"Урок {lesson.lesson_id} добавлен в курс {self.course_id}")
 
+            # Получить текущее количество шагов в уроке
+            response = requests.get(
+                f'https://stepik.org/api/lessons/{lesson.lesson_id}',
+                headers={
+                    'Authorization': f'Bearer {self.token}',
+                    'Content-Type': 'application/json'
+                }
+            )
+            response.raise_for_status()
+            existing_steps_count = len(response.json()['lessons'][0].get('steps', []))
+
+            print(f"Существующих шагов: {existing_steps_count}")
+
+            # Добавляем только новые шаги
             for idx, step in enumerate(lesson.steps, start=1):
                 try:
-                    step_url = f"https://stepik.org/lesson/{lesson.lesson_id}/step/{idx}"
-                    step.update(step_url, self.token)
-                    print(f"✅ Шаг {idx} успешно обновлён: {step_url}")
-                except Exception as step_err:
-                    print(f"❌ Ошибка при обновлении шага {idx}: {step_err}")
+                    position = existing_steps_count + idx
+                    step.create(lesson.lesson_id, position, self.token)
+                    print(f"➕ Новый шаг {position} создан в уроке {lesson.lesson_id}")
+                except Exception as create_err:
+                    print(f"❌ Ошибка при создании шага {idx}: {create_err}")
 
         except Exception as e:
             print(f"Ошибка при загрузке и публикации урока: {e}")
