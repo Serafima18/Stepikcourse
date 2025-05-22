@@ -39,15 +39,19 @@ class StepString(Step):
 
     def to_json(self):
         result = {
-            "id": self.step_id,
-            "title": self.title,
             "name": "string",
             "text": self.text,
-            "answer": self.answer
+            "options": {
+                "title": self.title,
+                "text": self.text,
+                "answer": self.answer,
+            },
+            "is_html_enabled": True,
+            "preserve_order": False
         }
 
-        if self.regexp:
-            result["regexp"] = self.regexp
+        # if self.regexp:
+        #     result["regexp"] = self.regexp
         return result
 
     def validate(self):
