@@ -6,9 +6,11 @@ class StepQuiz(Step):
     @classmethod
     def parse(cls, step_id, title, text, step_type='QUIZ'):
         question = ""
+        possible_answers_tmp = {}
         possible_answers = {}
         shuffle: bool = True
         answer: list = []
+        is_mlt = False
 
         lines = [line for line in text.splitlines()]
 
@@ -20,7 +22,7 @@ class StepQuiz(Step):
         tmp = ''
 
         for line in lines:
-            if not answer and not possible_answers and flag != 'TEXTEND':
+            if not answer and not possible_answers_tmp and flag != 'TEXTEND':
                 if line.strip() == 'TEXTBEGIN':
                     flag = 'TEXTBEGIN'
                     continue
@@ -39,9 +41,9 @@ class StepQuiz(Step):
             if not answer:
                 if not parse_answer.matches(line):
                     if parse_poss_ans.matches(line.lstrip()):
-                        poss_ans = parse_poss_ans.parseString(line.lstrip())
+                        poss_ans = parse_poss_ans.parseString(line.lstrip()).asList()
                         tmp = poss_ans[0]
-                        possible_answers[poss_ans[0]] = poss_ans[1].strip()
+                        possible_answers_tmp[poss_ans[0]] = poss_ans[1]
                         continue
 
             if parse_shuffle.matches(line):
@@ -51,21 +53,25 @@ class StepQuiz(Step):
             if parse_answer.matches(line):
                 parse_tmp = pp.Suppress("ANSWER:") + pp.SkipTo(pp.LineEnd())
                 line = "ANSWER: " + parse_tmp.parseString(line)[0].replace(' ', '')
-                answer_res = parse_answer.parseString(line)
-                answer = answer_res.asList()
+                answer = parse_answer.parseString(line).asList()
+
+                is_mlt = (len(answer) > 1)
+
+                for key in possible_answers_tmp.keys():
+                    possible_answers[possible_answers_tmp[key]] = (key in answer)
                 continue
 
             if tmp:
-                if '\n' in possible_answers[tmp] or line.strip():
-                    possible_answers[tmp] += '\n' + line
+                if '\n' in possible_answers_tmp[tmp] or line.strip():
+                    possible_answers_tmp[tmp] += '\n' + line
 
-        return StepQuiz(step_id, title, question, possible_answers, answer, shuffle)
+        return StepQuiz(step_id, title, question, possible_answers, is_mlt, shuffle)
 
-    def __init__(self, step_id, title, text, possible_answers, answer, shuffle=True):
+    def __init__(self, step_id, title, text, possible_answers, is_mlt, shuffle=True):
         super().__init__(step_id, title, text)
         self.possible_answers = possible_answers
         self.shuffle = shuffle
-        self.answer = answer
+        self.is_mlt = is_mlt
 
     def to_json(self):
         result = {
@@ -74,8 +80,7 @@ class StepQuiz(Step):
             "name": "quiz",
             "text": self.text,
             "possible answers": self.possible_answers,
-            "shuffle": self.shuffle,
-            "answer": self.answer
+            "shuffle": self.shuffle
         }
 
         return result
@@ -88,5 +93,3 @@ class StepQuiz(Step):
             raise ValueError("Question must not be empty.")
         if not self.possible_answers:
             raise ValueError("Possible answers must not be empty")
-        if not self.answer:
-            raise ValueError("Answer must not be empty.")

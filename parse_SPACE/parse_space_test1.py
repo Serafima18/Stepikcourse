@@ -1,4 +1,5 @@
 from step_classes import Step
+from markdown import markdown
 
 text = '''
 Тут будет текст вопроса на несколько строк.
@@ -17,7 +18,7 @@ step_test = Step.parse(1, 'title', text, "SPACE")
 
 
 def test_parsing_space1_question():
-    assert step_test.text == 'Тут будет текст вопроса на несколько строк.'
+    assert step_test.text == markdown('Тут будет текст вопроса на несколько строк.')
 
 
 def test_parsing_space1_answer():

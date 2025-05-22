@@ -1,4 +1,5 @@
 from step_classes import Step
+from markdown import markdown
 
 
 def test_parse_match1():
@@ -22,7 +23,7 @@ MATCH
 
     step_test = Step.parse(1, 'title', text, 'MATCHING')
 
-    assert step_test.text == 'Какой-то вопрос???'
+    assert step_test.text == markdown('Какой-то вопрос???')
     assert step_test.pairs == [
         {
             'first': 'строка 1',
@@ -64,7 +65,7 @@ match3
 '''
     step_test = Step.parse(1, 'title', text, 'MATCHING')
 
-    assert step_test.text == 'Question???\nQuestion question'
+    assert step_test.text == markdown('Question???\nQuestion question')
 
     assert step_test.pairs == [
         {
@@ -115,7 +116,7 @@ match3
 '''
     step_test = Step.parse(1, 'title', text, 'MATCHING')
 
-    assert step_test.text == 'Question???\n\nQuestion question'
+    assert step_test.text == markdown('Question???\n\nQuestion question')
 
     assert step_test.pairs == [
         {
