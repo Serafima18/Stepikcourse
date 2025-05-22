@@ -2,6 +2,7 @@ import pyparsing  as pp
 from re           import VERBOSE
 from step_classes import Step
 
+
 class StepNumber(Step):
     """
     Класс для задач Number.
@@ -20,7 +21,6 @@ class StepNumber(Step):
                 """, flags=VERBOSE
                 )
 
-
         def convert_number(t: pp.ParseResults):
             """Convert a string matching a number to a python number"""
             if t.float1 or t.float2 or t.float3 : return [float(t[0])]
@@ -28,31 +28,32 @@ class StepNumber(Step):
 
         number.setParseAction(convert_number)
 
-
         #tolerance = pp.Suppress("+-") + number
-        
+
         parse_answer = (
             pp.Suppress("ANSWER:")
             + number ("value")
             + pp.Optional(pp.Suppress("+-") + number ("tolerance")) 
         )
 
-
         lines = [line for line in text.splitlines()]
         results = {
-            "text": str,  # Текст вопроса
-            "answer": float,  # Ответы
-            "tolerance": float,  # Погрешности
+            "text": "",  # Текст вопроса
+            "answer": float,  # Ответ
+            "tolerance": float,  # Погрешность
         }
 
+        got_answer = False
+
         for line in lines:
-            if not results["answer"]:
+            if not got_answer:
                 if not parse_answer.matches(line):
                     if results["text"]:
-                        results[text] += "\n"
+                        results["text"] += "\n"
                     results["text"] += line
-            
+
             if parse_answer.matches(line):
+                got_answer = True
                 answer_result = parse_answer.parseString(line)
 
                 results["answer"] = answer_result.value
@@ -67,7 +68,7 @@ class StepNumber(Step):
                 #else:
                 #    results["tolerance"].append(0)
 
-        return StepNumber(step_id, title, text, results["answer"], results["tolerance"])
+        return StepNumber(step_id, title, results["text"], results["answer"], results["tolerance"])
 
     def __init__(self, step_id: int, title: str, text: str, answer: float, tolerance: float = 0):
         super().__init__(step_id, title, text)
@@ -77,6 +78,8 @@ class StepNumber(Step):
 
     def to_json(self) -> dict:
         return {
+            "id": self.step_id,
+            "title": self.title,
             "name": "number",
             "text": self.text,
             "answer": f"{self.answer} ± {self.tolerance}",
@@ -84,6 +87,9 @@ class StepNumber(Step):
         }
 
     def validate(self) -> None:
+        """
+        Проверяет, что все необходимые атрибуты заданы корректно.
+        """
         if self.answer is None:
             raise ValueError("Answer must not be None.")
         if self.tolerance < 0:
