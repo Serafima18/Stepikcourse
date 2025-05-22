@@ -78,13 +78,17 @@ class StepNumber(Step):
 
     def to_json(self) -> dict:
         return {
-            "id": self.step_id,
-            "title": self.title,
-            "name": "number",
-            "text": self.text,
-            "answer": f"{self.answer} ± {self.tolerance}",
-            "is_html_enabled": True
-        }
+                "name": "number",
+                "text": self.text,
+                "options": {
+                    "answer": {
+                        "number": self.answer,
+                        "tolerance": self.tolerance
+                    },
+                    "is_html_enabled": True
+                }
+            }
+
 
     def validate(self) -> None:
         """

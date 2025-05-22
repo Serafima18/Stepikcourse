@@ -155,19 +155,23 @@ class StepTaskinline(Step):
         self.config = config
 
     def to_json(self):
-        result = {
-            "id": self.step_id,
-            "title": self.title,
-            "name": "taskinline",
-            "text": self.text,
-            "answer": self.code,
-            "header": self.header,
-            "footer": self.footer,
-            "score": self.config["score"],
-            "visible_tests": self.config["visible_tests"],
-            "checker": self.config["checker"],
-            "additional_params": self.config["additional_params"]
-        }
+        return {
+                "name": "taskinline",
+                "text": self.text,
+                "options": {
+                    "code_templates": [{
+                        "text": self.code
+                    }],
+                    "header": self.header,
+                    "footer": self.footer,
+                    "limits": {
+                        "score": self.config["score"]
+                    },
+                    "visible_tests": self.config["visible_tests"],
+                    "checker": self.config["checker"],
+                    "additional_params": self.config["additional_params"]
+                }
+            }
 
     def validate(self):
         """
