@@ -12,6 +12,7 @@ from lesson_classes import Lesson
 from step_classes import Step, StepText, StepNumber, StepikAPI
 from h1_h2_steps.h1_h2_steps import parse_text
 
+
 class StepikCourseTools:
     def __init__(self):
         self.api = StepikAPI()
@@ -34,7 +35,7 @@ class StepikCourseTools:
         if not client_id or not client_secret:
             print("Не удалось загрузить учетные данные")
             return False
-        
+
         try:
             self.token = self.api.get_token(client_id, client_secret)
             print("Аутентификация прошла успешно")
@@ -48,10 +49,9 @@ class StepikCourseTools:
         step_id = id
         title = step_data['header']
         text = step_data['text']
-        
+
         # Вызов строго через Step.parse (он не должен быть переопределён в наследниках)
         return Step.parse(step_id, title, text, step_type.upper())
-
 
     def save_lesson_to_markdown(self, lesson: Lesson, filename: str) -> bool:
         try:
@@ -93,7 +93,7 @@ class StepikCourseTools:
             steps_raw = lesson_data.get("steps", [])
             if not lesson_id:
                 raise ValueError("В Markdown-файле должен быть указан lesson_id")
-            
+
             lesson = Lesson(lesson_id=int(lesson_id))
 
             for idx, step_data in enumerate(steps_raw, start=1):
@@ -176,6 +176,7 @@ class StepikCourseTools:
                 break
             else:
                 print("Некорректный выбор")
+
 
 if __name__ == '__main__':
     tools = StepikCourseTools()
