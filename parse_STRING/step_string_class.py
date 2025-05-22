@@ -43,7 +43,6 @@ class StepString(Step):
             "text": self.text,
             "options": {
                 "title": self.title,
-                "text": self.text,
                 "answer": self.answer,
             },
             "is_html_enabled": True,

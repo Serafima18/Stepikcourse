@@ -74,16 +74,18 @@ class StepQuiz(Step):
         self.is_mlt = is_mlt
 
     def to_json(self):
-        result = {
-            "id": self.step_id,
-            "title": self.title,
+        block = {
             "name": "quiz",
             "text": self.text,
-            "possible answers": self.possible_answers,
-            "shuffle": self.shuffle
+            "source": {
+                "options": self.possible_answers,
+                "is_multiple_choice": self.is_mlt,
+                "is_html_enabled": True,
+                "shuffle": self.shuffle
+            },
         }
 
-        return result
+        return block
 
     def validate(self):
         """
