@@ -6,6 +6,7 @@ import yaml
 from pathlib import Path
 from typing import List
 from dataclasses import dataclass, field
+from markdown import markdown
 
 
 class Step:
@@ -15,7 +16,7 @@ class Step:
     def __init__(self, step_id: int, title: str, text: str):
         self.step_id = step_id
         self.title = title
-        self.text = text
+        self.text = markdown(text)
 
     def to_json(self) -> dict:
         raise NotImplementedError("Subclasses should implement this!")
