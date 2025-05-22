@@ -127,8 +127,10 @@ class Step:
         from parse_QUIZ.step_quiz_class import StepQuiz
         from parse_SPACE.step_space_class import StepSpace
         from parse_MATCH.step_match_class import StepMatching
+        from parse_NUMBER.step_number_class import StepNumber
+        from parse_TASKINLINE.step_taskinline_class import StepTaskinline
 
-        if step_type not in ['TEXT', 'STRING', 'NUMBER', 'QUIZ', 'SPACE', 'MATCHING']:
+        if step_type not in ['TEXT', 'STRING', 'NUMBER', 'QUIZ', 'SPACE', 'MATCHING', 'TASKINLINE']:
             raise NotImplementedError("Incorrect step type")
 
         match step_type:
@@ -144,6 +146,8 @@ class Step:
                 return StepSpace.parse(step_id, title, text)
             case 'MATCHING':
                 return StepMatching.parse(step_id, title, text)
+            case 'TASKINLINE':
+                return StepTaskinline.parse(step_id, title, text)
 
 
 class StepText(Step):
