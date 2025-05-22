@@ -16,7 +16,7 @@ step_test = Step.parse(1, 'title', text, 'SPACE')
 
 
 def test_parse_space2_question():
-    assert step_test.question == 'Some question'
+    assert step_test.text == 'Some question'
 
 
 def test_parse_space2_txt_space():

@@ -114,7 +114,7 @@ print(x)
 ANSWER: C
 '''
     step_test = Step.parse(1, 'title', text, "QUIZ")
-    assert step_test.question == \
+    assert step_test.text == \
 '''Это вопрос в формате AIKEN. SHUFFLE - перемешивать ответы при очередном прохождении теста.
 По умолчанию они перемешиваются. Отключается перемешивание установкой опции в значение false (без учета регистра).
 '''

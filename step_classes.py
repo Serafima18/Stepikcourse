@@ -12,9 +12,10 @@ class Step:
     """
     Базовый класс для всех шагов.
     """
-    def __init__(self, step_id: int, title: str):
+    def __init__(self, step_id: int, title: str, text: str):
         self.step_id = step_id
         self.title = title
+        self.text = text
 
     def to_json(self) -> dict:
         raise NotImplementedError("Subclasses should implement this!")
@@ -141,19 +142,18 @@ class Step:
 
 
 class StepText(Step):
-    def __init__(self, step_id: int, title: str, content: str):
-        super().__init__(step_id, title)
-        self.content = content
+    def __init__(self, step_id: int, title: str, text: str):
+        super().__init__(step_id, title, text)
 
     def to_json(self) -> dict:
         return {
             "name": "text",
-            "text": self.content,
+            "text": self.text,
             "is_html_enabled": True
         }
 
     def validate(self) -> None:
-        if not self.content:
+        if not self.text:
             raise ValueError("Content must not be empty.")
 
 
@@ -177,33 +177,6 @@ class StepNumber(Step):
             raise ValueError("Answer must not be None.")
         if self.tolerance < 0:
             raise ValueError("Tolerance must not be negative.")
-
-
-class StepString(Step):
-    def __init__(self, step_id: int, title: str, question: str, answer: str, regexp: str = None):
-        super().__init__(step_id, title)
-        self.question = question
-        self.answer = answer
-        self.regexp = regexp
-
-    def to_json(self) -> dict:
-        result = {
-            "name": "string",
-            "text": self.question,
-            "answer": self.answer,
-            "is_html_enabled": True
-        }
-        if self.regexp:
-            result["regexp"] = self.regexp
-        return result
-
-    def validate(self) -> None:
-        if not self.question:
-            raise ValueError("Question must not be empty.")
-        if not self.answer:
-            raise ValueError("Answer must not be empty.")
-        if self.regexp and not isinstance(self.regexp, str):
-            raise ValueError("Regexp must be a string if provided.")
 
 
 class StepikAPI:

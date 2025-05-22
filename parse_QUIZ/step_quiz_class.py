@@ -61,9 +61,8 @@ class StepQuiz(Step):
 
         return StepQuiz(step_id, title, question, possible_answers, answer, shuffle)
 
-    def __init__(self, step_id, title, question, possible_answers, answer, shuffle=True):
-        super().__init__(step_id, title)
-        self.question = question
+    def __init__(self, step_id, title, text, possible_answers, answer, shuffle=True):
+        super().__init__(step_id, title, text)
         self.possible_answers = possible_answers
         self.shuffle = shuffle
         self.answer = answer
@@ -73,7 +72,7 @@ class StepQuiz(Step):
             "id": self.step_id,
             "title": self.title,
             "type": "string",
-            "question": self.question,
+            "text": self.text,
             "possible answers": self.possible_answers,
             "shuffle": self.shuffle,
             "answer": self.answer
@@ -85,7 +84,7 @@ class StepQuiz(Step):
         """
         Проверяет, что все необходимые атрибуты заданы корректно.
         """
-        if not self.question:
+        if not self.text:
             raise ValueError("Question must not be empty.")
         if not self.possible_answers:
             raise ValueError("Possible answers must not be empty")

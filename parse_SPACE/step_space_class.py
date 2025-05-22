@@ -104,10 +104,9 @@ class StepSpace(Step):
         return StepSpace(step_id, title, question, txt_space, space_number,
                          answer, caseless, show_correct, score_formula, score)
 
-    def __init__(self, step_id, title, question, txt_space, space_number,
+    def __init__(self, step_id, title, text, txt_space, space_number,
                  answer, caseless, show_correct, score_formula, score):
-        super().__init__(step_id, title)
-        self.question = question
+        super().__init__(step_id, title, text)
         self.txt_space = txt_space
         self.space_number = space_number
         self.answer = answer
@@ -121,7 +120,7 @@ class StepSpace(Step):
             "id": self.step_id,
             "title": self.title,
             "type": "space",
-            "question": self.question,
+            "text": self.text,
             "text with space": self.txt_space,
             "space number": self.space_number,
             "answer": self.answer,
@@ -137,7 +136,7 @@ class StepSpace(Step):
         """
         Проверяет, что все необходимые атрибуты заданы корректно.
         """
-        if not self.question:
+        if not self.text:
             raise ValueError("Question must not be empty.")
         if not self.txt_space:
             raise ValueError("Text with space must not be empty.")

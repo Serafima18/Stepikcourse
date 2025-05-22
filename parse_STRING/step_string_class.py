@@ -32,9 +32,8 @@ class StepString(Step):
 
         return StepString(step_id, title, question, answer, regexp)
 
-    def __init__(self, step_id, title, question, answer, regexp=None):
-        super().__init__(step_id, title)
-        self.question = question
+    def __init__(self, step_id, title, text, answer, regexp=None):
+        super().__init__(step_id, title, text)
         self.answer = answer
         self.regexp = regexp
 
@@ -43,7 +42,7 @@ class StepString(Step):
             "id": self.step_id,
             "title": self.title,
             "type": "string",
-            "question": self.question,
+            "text": self.text,
             "answer": self.answer
         }
 
@@ -55,7 +54,7 @@ class StepString(Step):
         """
         Проверяет, что все необходимые атрибуты заданы корректно.
         """
-        if not self.question:
+        if not self.text:
             raise ValueError("Question must not be empty.")
         if not self.answer:
             raise ValueError("Answer must not be empty.")

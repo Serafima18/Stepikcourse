@@ -51,9 +51,8 @@ class StepMatching(Step):
 
         return StepMatching(step_id, title, question, pairs)
 
-    def __init__(self, step_id, title, question, pairs):
-        super().__init__(step_id, title)
-        self.question = question
+    def __init__(self, step_id, title, text, pairs):
+        super().__init__(step_id, title, text)
         self.pairs = pairs
 
     def to_json(self):
@@ -61,7 +60,7 @@ class StepMatching(Step):
             "id": self.step_id,
             "title": self.title,
             "type": "matching",
-            "question": self.question,
+            "text": self.text,
             "pairs": self.pairs
         }
 
@@ -71,7 +70,7 @@ class StepMatching(Step):
         """
         Проверяет, что все необходимые атрибуты заданы корректно.
         """
-        if not self.question:
+        if not self.text:
             raise ValueError("Question must not be empty.")
         if not self.pairs:
             raise ValueError("Pairs must not be empty")
