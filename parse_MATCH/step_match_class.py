@@ -57,11 +57,13 @@ class StepMatching(Step):
 
     def to_json(self):
         result = {
-            "id": self.step_id,
-            "title": self.title,
-            "name": "matching",
             "text": self.text,
-            "pairs": self.pairs
+            "name": "matching",
+            "source": {
+                "preserve_firsts_order": True,
+                "is_html_enabled": True,
+                "pairs": self.pairs
+            }
         }
 
         return result
