@@ -6,6 +6,7 @@
 import requests
 import yaml
 import json
+import re
 from pathlib import Path
 from typing import Optional, Dict
 from lesson_classes import Lesson
@@ -119,41 +120,180 @@ class StepikCourseTools:
 
             # Добавляем только новые шаги
             for idx, step in enumerate(lesson.steps, start=1):
+                step_url = f"https://stepik.org/lesson/{lesson.lesson_id}/step/{idx}"
                 try:
-                    position = existing_steps_count + idx
-                    step.create(lesson.lesson_id, position, self.token)
-                    print(f"➕ Новый шаг {position} создан в уроке {lesson.lesson_id}")
+                    # Пробуем обновить
+                    step.update(step_url, self.token)
+                    print(f"🔁 Шаг {idx} обновлён")
+                except Exception as e:
+                    print(f"❌ Ошибка при обновлении шага {idx}: {e}")
                 except Exception as create_err:
                     print(f"❌ Ошибка при создании шага {idx}: {create_err}")
 
         except Exception as e:
             print(f"Ошибка при загрузке и публикации урока: {e}")
 
+    def _handle_step_deletion(self):
+        try:
+            lesson_id = int(input("Введите ID урока, из которого нужно удалить шаг: "))
+            step_pos = int(input("Введите номер шага, который нужно удалить: "))
+            step_url = f"https://stepik.org/lesson/{lesson_id}/step/{step_pos}"
+            confirm = input(f"Удалить шаг {step_pos} из урока {lesson_id}? (y/n): ").lower()
+            if confirm == 'y':
+                dummy_step = Step(step_id=0, title="", text="")  # просто для вызова метода
+                success = dummy_step.remove(step_url, self.token)
+                if success:
+                    print(f"✅ Шаг {step_pos} успешно удалён из урока {lesson_id}")
+                else:
+                    print(f"❌ Не удалось удалить шаг")
+            else:
+                print("Операция отменена")
+        except Exception as e:
+            print(f"Ошибка: {e}")
+
+    def _handle_step_update(self):
+        try:
+            lesson_id = int(input("Введите ID урока, где нужно обновить шаг: "))
+            step_pos = int(input("Введите номер шага для обновления: "))
+            folder = Path("example")
+            md_files = list(folder.glob("*.md"))
+            if not md_files:
+                print("В папке example нет .md файлов")
+                return
+            print("Доступные .md файлы:")
+            for idx, f in enumerate(md_files, 1):
+                print(f"{idx}. {f.name}")
+            file_name = input("Введите имя файла (например, first_lesson.md): ")
+            selected_path = folder / file_name
+            if not selected_path.exists():
+                print("Файл не найден")
+                return
+
+            # Парсим шаги из файла
+            with open(selected_path, 'r', encoding='utf-8') as f:
+                text = f.read()
+            lesson_data = parse_text(text)
+            steps = lesson_data.get("steps", [])
+
+            if step_pos < 1 or step_pos > len(steps):
+                print(f"❌ В файле только {len(steps)} шагов. Указанный шаг {step_pos} вне диапазона.")
+                return
+
+            step_data = steps[step_pos - 1]
+            step = Step.parse(step_pos, step_data['header'], step_data['text'], step_data['type'])
+            step_url = f"https://stepik.org/lesson/{lesson_id}/step/{step_pos}"
+            step.update(step_url, self.token)
+            print(f"✅ Шаг {step_pos} в уроке {lesson_id} обновлён")
+
+        except Exception as e:
+            print(f"Ошибка при обновлении шага: {e}")
+
+    def _handle_step_update_from_file_ids(self):
+        try:
+            folder = Path("example")
+            md_files = list(folder.glob("*.md"))
+            if not md_files:
+                print("В папке example нет .md файлов")
+                return
+
+            print("Доступные .md файлы:")
+            for idx, f in enumerate(md_files, 1):
+                print(f"{idx}. {f.name}")
+            file_name = input("Введите имя файла (например, first_step.md): ")
+            selected_path = folder / file_name
+            if not selected_path.exists():
+                print("Файл не найден")
+                return
+
+            with open(selected_path, 'r', encoding='utf-8') as f:
+                raw_text = f.read()
+
+            # Ищем lesson_id и step_id в тексте
+            lesson_id_match = re.search(r'lesson_id\s*:\s*(\d+)', raw_text)
+            step_id_match = re.search(r'step_id\s*:\s*(\d+)', raw_text)
+
+            if not lesson_id_match or not step_id_match:
+                print("❌ В файле должны быть строки 'lesson_id: N' и 'step_id: M'")
+                return
+
+            lesson_id = int(lesson_id_match.group(1))
+            step_id = int(step_id_match.group(1))
+
+            parsed = parse_text(raw_text)
+            steps = parsed.get("steps", [])
+            if not steps:
+                print("❌ Файл не содержит шагов")
+                return
+
+            step_data = steps[0]
+            step = Step.parse(
+                step_id=step_id,
+                title=step_data['header'],
+                text=step_data['text'],
+                step_type=step_data['type']
+            )
+
+            step_url = f"https://stepik.org/lesson/{lesson_id}/step/{step_id}"
+            step.update(step_url, self.token)
+            print(f"✅ Шаг {step_id} в уроке {lesson_id} обновлён из файла")
+
+        except Exception as e:
+            print(f"🚫 Ошибка при обновлении шага: {e}")
+
+
+    def _handle_lesson_upload(self, update_existing: bool):
+        folder = Path("example")
+        md_files = list(folder.glob("*.md"))
+        if not md_files:
+            print("В папке example нет .md файлов")
+            return
+
+        print("Доступные .md файлы:")
+        for idx, f in enumerate(md_files, 1):
+            print(f"{idx}. {f.name}")
+
+        file_name = input("Введите имя файла (например, first_lesson.md): ")
+        selected_path = folder / file_name
+        if not selected_path.exists():
+            print("Файл не найден")
+            return
+
+        if update_existing:
+            self.upload_lesson_from_markdown(selected_path)
+        else:
+            self.create_new_lesson_from_markdown(selected_path)
+
     def interactive_dialog(self):
         print("=== Stepik Tools ===")
+
         if not Path("creds.yaml").exists():
             print("Файл creds.yaml не найден")
             return
         if not self.authenticate():
             return
+
+        # Запрашиваем course_id один раз при запуске
+        while True:
+            try:
+                self.course_id = int(input("Введите ID курса: "))
+                break
+            except ValueError:
+                print("Некорректный ID курса, попробуйте ещё раз.")
+
         while True:
             print("\nГлавное меню:")
-            print("1. Изменить курс")
-            print("2. Загрузить курс и показать шаги")
-            print("3. Сохранить все уроки в Markdown")
-            print("4. Загрузить и опубликовать lesson.md")
+            print("1. Обновить существующий урок из Markdown")
+            print("2. Создать и загрузить новый урок из Markdown")
+            print("3. Удалить шаг из урока")
+            print("4. Обновить шаг в уроке (из Markdown)")
             print("5. Выход")
+
             choice = input("Выберите действие (1-5): ")
+
             if choice == '1':
-                try:
-                    self.course_id = int(input("Введите ID курса: "))
-                except ValueError:
-                    print("Некорректный ID курса")
-            elif choice == '2':
-                print("Пункт временно отключен")
-            elif choice == '3':
-                self.save_lessons_to_file()
-            elif choice == '4':
+                self._handle_lesson_upload(update_existing=True)
+
+            if choice == '2':
                 folder = Path("example")
                 md_files = list(folder.glob("*.md"))
                 if not md_files:
@@ -162,18 +302,24 @@ class StepikCourseTools:
                     print("Доступные .md файлы:")
                     for idx, f in enumerate(md_files, 1):
                         print(f"{idx}. {f.name}")
-                    try:
-                        file_name = input("Введите имя файла (например, first_lesson.md): ")
-                        selected_path = folder / file_name
-                        if selected_path.exists():
-                            self.upload_lesson_from_markdown(selected_path)
-                        else:
-                            print("Файл не найден")
-                    except ValueError:
-                        print("Ошибка: введите число")
+                    file_name = input("Введите имя файла (например, first_lesson.md): ")
+                    selected_path = folder / file_name
+                    if selected_path.exists():
+                        self.upload_lesson_from_markdown(selected_path)
+                    else:
+                        print("Файл не найден")
+
+            elif choice == '3':
+                self._handle_step_deletion()
+
+            elif choice == '4':
+                self._handle_step_update_from_file_ids()
+
+
             elif choice == '5':
                 print("Завершение работы")
                 break
+
             else:
                 print("Некорректный выбор")
 
