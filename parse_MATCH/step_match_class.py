@@ -59,7 +59,7 @@ class StepMatching(Step):
         result = {
             "id": self.step_id,
             "title": self.title,
-            "type": "matching",
+            "name": "matching",
             "text": self.text,
             "pairs": self.pairs
         }

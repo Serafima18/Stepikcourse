@@ -71,7 +71,7 @@ class StepQuiz(Step):
         result = {
             "id": self.step_id,
             "title": self.title,
-            "type": "quiz",
+            "name": "quiz",
             "text": self.text,
             "possible answers": self.possible_answers,
             "shuffle": self.shuffle,
