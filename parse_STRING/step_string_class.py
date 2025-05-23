@@ -39,17 +39,24 @@ class StepString(Step):
 
     def to_json(self):
         result = {
-            "id": self.step_id,
-            "title": self.title,
             "name": "string",
             "text": self.text,
-            "answer": self.answer
+            "is_html_enabled": True,
+            "preserve_order": False,
+            "title": self.title,
+            "answer": self.answer,
+            "source": {
+                "pattern": (self.regexp if self.regexp else self.answer),
+                "use_re": False,
+                "case_sensitive": False,
+                "match_substring": False,
+                "code": "pass"
+            },
+            "sample_size": 10
         }
 
-        if self.regexp:
-            result["regexp"] = self.regexp
         return result
-
+    
     def validate(self):
         """
         Проверяет, что все необходимые атрибуты заданы корректно.

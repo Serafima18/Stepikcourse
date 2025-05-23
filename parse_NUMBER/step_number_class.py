@@ -73,19 +73,19 @@ class StepNumber(Step):
     def __init__(self, step_id: int, title: str, text: str, answer: float, tolerance: float = 0):
         super().__init__(step_id, title, text)
         self.text = text
-        self.answer = answer
-        self.tolerance = tolerance
+        self.answer = str(answer)
+        self.tolerance = str(tolerance)
 
     def to_json(self) -> dict:
         return {
                 "name": "number",
                 "text": self.text,
-                "options": {
-                    "answer": {
-                        "number": self.answer,
-                        "tolerance": self.tolerance
-                    },
-                    "is_html_enabled": True
+                "source": {
+                    "options": [{
+                        "answer": self.answer,
+                        "max_error": self.tolerance,
+                        "is_html_enabled": True
+                    }]
                 }
             }
 
