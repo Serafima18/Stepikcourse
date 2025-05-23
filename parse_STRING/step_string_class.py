@@ -41,19 +41,20 @@ class StepString(Step):
         result = {
             "name": "string",
             "text": self.text,
+            "code": "pass",
             "options": {
                 "title": self.title,
                 "answer": self.answer,
                 "pattern": self.regexp if self.regexp else self.answer,
-                "use_re": bool(self.regexp),                
+                "use_re": False,                
                 "case_sensitive": False,          
                 "match_substring": False
             },
             "is_html_enabled": True,
             "preserve_order": False,
-            "code": ""
         }
-
+        return result
+    
     def validate(self):
         """
         Проверяет, что все необходимые атрибуты заданы корректно.

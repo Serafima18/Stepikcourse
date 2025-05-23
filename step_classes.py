@@ -63,7 +63,7 @@ class Step:
 
         data = {
             'step-source': {
-                'block': self.to_json(),  # Важно: теперь это будет правильный формат для QUIZ
+                'block': self.to_json(),
                 'lesson': lesson_id,
                 'position': position
             }
