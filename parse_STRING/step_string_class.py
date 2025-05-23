@@ -41,18 +41,20 @@ class StepString(Step):
         result = {
             "name": "string",
             "text": self.text,
-            "code": "pass",
-            "options": {
-                "title": self.title,
-                "answer": self.answer,
-                "pattern": self.regexp if self.regexp else self.answer,
-                "use_re": False,                
-                "case_sensitive": False,          
-                "match_substring": False
-            },
             "is_html_enabled": True,
             "preserve_order": False,
+            "title": self.title,
+            "answer": self.answer,
+            "source": {
+                "pattern": (self.regexp if self.regexp else self.answer),
+                "use_re": False,
+                "case_sensitive": False,
+                "match_substring": False,
+                "code": "pass"
+            },
+            "sample_size": 10
         }
+
         return result
     
     def validate(self):
