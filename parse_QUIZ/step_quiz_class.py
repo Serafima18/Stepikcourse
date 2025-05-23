@@ -67,6 +67,12 @@ class StepQuiz(Step):
                 if '\n' in possible_answers_tmp[tmp] or line.strip():
                     possible_answers_tmp[tmp] += '\n' + line
 
+        for i in range(len(possible_answers)):
+            if possible_answers[i]["is_correct"]:
+                possible_answers[i]["feedback"] = "Right"
+            else:
+                possible_answers[i]["feedback"] = "Wrong"
+
         return StepQuiz(step_id, title, question, possible_answers, is_mlt, shuffle)
 
     def __init__(self, step_id, title, text, possible_answers, is_mlt, shuffle=True):
@@ -79,12 +85,16 @@ class StepQuiz(Step):
         block = {
             "name": "choice",
             "text": self.text,
-            "options": {
-                "choice": self.possible_answers,
+            "source": {
+                "options": self.possible_answers,
                 "is_multiple_choice": self.is_mlt,
                 "is_html_enabled": True,
-                "shuffle": self.shuffle
-            },
+                "shuffle": self.shuffle,
+                "is_always_correct": False,
+                "sample_size": len(self.possible_answers),
+                "preserve_order": False,
+                "is_options_feedback": False
+            }
         }
 
         return block
