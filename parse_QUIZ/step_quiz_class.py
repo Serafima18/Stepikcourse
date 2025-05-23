@@ -7,7 +7,7 @@ class StepQuiz(Step):
     def parse(cls, step_id, title, text, step_type='QUIZ'):
         question = ""
         possible_answers_tmp = {}
-        possible_answers = {}
+        possible_answers = []
         shuffle: bool = True
         answer: list = []
         is_mlt = False
@@ -42,8 +42,9 @@ class StepQuiz(Step):
                 if not parse_answer.matches(line):
                     if parse_poss_ans.matches(line.lstrip()):
                         poss_ans = parse_poss_ans.parseString(line.lstrip()).asList()
-                        tmp = poss_ans[0]
-                        possible_answers_tmp[poss_ans[0]] = poss_ans[1]
+                        tmp = poss_ans[1]
+                        possible_answers_tmp[poss_ans[1]] = poss_ans[0]
+                        possible_answers.append({"text": poss_ans[1], "is_correct": False})
                         continue
 
             if parse_shuffle.matches(line):
@@ -57,8 +58,9 @@ class StepQuiz(Step):
 
                 is_mlt = (len(answer) > 1)
 
-                for key in possible_answers_tmp.keys():
-                    possible_answers[possible_answers_tmp[key]] = (key in answer)
+                for i in range(len(possible_answers)):
+                    if possible_answers_tmp[possible_answers[i]["text"]] in answer:
+                        possible_answers[i]["is_correct"] = True
                 continue
 
             if tmp:
@@ -78,7 +80,7 @@ class StepQuiz(Step):
             "name": "choice",
             "text": self.text,
             "options": {
-                "choices": self.possible_answers,
+                "choice": self.possible_answers,
                 "is_multiple_choice": self.is_mlt,
                 "is_html_enabled": True,
                 "shuffle": self.shuffle

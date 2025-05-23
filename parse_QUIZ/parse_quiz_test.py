@@ -24,12 +24,24 @@ markdown('''Отметьте правильные ответы. SHUFFLE - пер
 
 Множественный выбор - пишем буквы в ответе через запятую. Пробелы игнорируются.
 ''')
-    assert step_test.possible_answers == {
-               "Это правильный ответ.": True,
-               "Нет.": False,
-               "Тоже хорошо.": True,
-               "Еще один правильный.": True
-           }
+    assert step_test.possible_answers == [
+        {
+            "text": "Это правильный ответ.",
+            "is_correct": True
+        },
+        {
+            "text": "Нет.",
+            "is_correct": False,
+        },
+        {
+            "text": "Тоже хорошо.",
+            "is_correct": True,
+        },
+        {
+            "text": "Еще один правильный.",
+            "is_correct": True
+        }
+    ]
     assert not step_test.shuffle
 
 
@@ -81,11 +93,20 @@ def square(size, col='blue'):
     t.lt(90)
 Отметьте правильные предложения.
 ''')
-    assert step_test.possible_answers == {
-               "square(100, 'red') нарисует красный квадрат размером 100": True,
-               "square(100) нарисует красный квадрат размером 100": False,
-               "square(100) нарисует синий квадрат размером 100": True
-           }
+    assert step_test.possible_answers == [
+        {
+            "text": "square(100, 'red') нарисует красный квадрат размером 100",
+            "is_correct": True
+        },
+        {
+            "text": "square(100) нарисует красный квадрат размером 100",
+            "is_correct": False
+        },
+        {
+            "text": "square(100) нарисует синий квадрат размером 100",
+            "is_correct": True
+        }
+    ]
     assert step_test.shuffle
 
 
