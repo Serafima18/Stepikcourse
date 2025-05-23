@@ -158,18 +158,21 @@ class StepTaskinline(Step):
         return {
                 "name": "taskinline",
                 "text": self.text,
-                "options": {
-                    "code_templates": [{
-                        "text": self.code
-                    }],
-                    "header": self.header,
-                    "footer": self.footer,
-                    "limits": {
-                        "score": self.config["score"]
+                "source": {
+                    "options": {
+                        "code_templates": [{
+                            "text": self.code,
+                        }],
+                        "header": self.header,
+                        "footer": self.footer,
+                        "limits": {
+                            "score": self.config["score"]
+                        },
+                        "visible_tests": self.config["visible_tests"],
+                        "checker": self.config["checker"],
+                        # "additional_params": self.config["additional_params"]
                     },
-                    "visible_tests": self.config["visible_tests"],
-                    "checker": self.config["checker"],
-                    "additional_params": self.config["additional_params"]
+                    "sample_size": 100
                 }
             }
 
