@@ -129,11 +129,9 @@ class Step:
         # Подключаем шаги из правильных модулей
         from parse_STRING.step_string_class import StepString
         from parse_QUIZ.step_quiz_class import StepQuiz
-        from parse_SPACE.step_space_class import StepSpace
         from parse_MATCH.step_match_class import StepMatching
         from parse_NUMBER.step_number_class import StepNumber
         from parse_TASKINLINE.step_taskinline_class import StepTaskinline
-        from h1_h2_steps.h1_h2_steps import parse_text
 
         # Маппинг шагов с типами
         step_classes = {
@@ -141,7 +139,6 @@ class Step:
             'STRING': StepString,
             'NUMBER': StepNumber,
             'QUIZ': StepQuiz,  # Обработчик для QUIZ
-            'SPACE': StepSpace,
             'MATCHING': StepMatching,
             'TASKINLINE': StepTaskinline
         }
