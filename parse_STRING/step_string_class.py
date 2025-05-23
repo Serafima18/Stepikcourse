@@ -44,6 +44,7 @@ class StepString(Step):
             "options": {
                 "title": self.title,
                 "answer": self.answer,
+                "use_re": bool(self.regexp)
             },
             "is_html_enabled": True,
             "preserve_order": False
