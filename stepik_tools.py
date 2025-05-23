@@ -349,19 +349,19 @@ class StepikCourseTools:
 
         while True:
             print("\nГлавное меню:")
-            print("1. Обновить существующий урок из Markdown")
-            print("2. Создать и загрузить новый урок из Markdown")
-            print("3. Удалить шаг из урока")
+            print("1. Создать и загрузить новый урок из Markdown")
+            print("2. Обновить существующий урок из Markdown")
+            print("3. Добавить шаг в существующий урок")
             print("4. Обновить шаг в уроке (из Markdown)")
-            print("5. Выход")
-            print("6. ➕ Добавить шаг в существующий урок")
+            print("5. Удалить шаг из урока")
+            print("6. Выход")
 
             choice = input("Выберите действие (1-6): ")
 
-            if choice == '1':
+            if choice == '2':
                 self._handle_lesson_upload(update_existing=True)
 
-            if choice == '2':
+            if choice == '1':
                 folder = Path("example")
                 md_files = list(folder.glob("*.md"))
                 if not md_files:
@@ -377,20 +377,18 @@ class StepikCourseTools:
                     else:
                         print("Файл не найден")
 
-            elif choice == '3':
+            elif choice == '5':
                 self._handle_step_deletion()
 
             elif choice == '4':
                 self._handle_step_update_from_file_ids()
 
-
-            elif choice == '5':
+            elif choice == '6':
                 print("Завершение работы")
                 break
-            
-            elif choice == '6':
-                self._handle_add_step_to_lesson()
 
+            elif choice == '3':
+                self._handle_add_step_to_lesson()
 
             else:
                 print("Некорректный выбор")
