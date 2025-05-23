@@ -10,7 +10,7 @@ import re
 from pathlib import Path
 from typing import Optional, Dict
 from lesson_classes import Lesson
-from step_classes import Step, StepText, StepNumber, StepikAPI
+from step_classes import Step, StepikAPI
 from h1_h2_steps.h1_h2_steps import parse_text
 
 
