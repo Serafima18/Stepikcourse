@@ -38,7 +38,7 @@ class StepString(Step):
         self.regexp = regexp
 
     def to_json(self):
-        result = {
+        return {
             "name": "string",
             "text": self.text,
             "is_html_enabled": True,
@@ -54,8 +54,6 @@ class StepString(Step):
             },
             "sample_size": 10
         }
-
-        return result
     
     def validate(self):
         """

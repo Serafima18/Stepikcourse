@@ -104,10 +104,10 @@ class StepSpace(Step):
         return StepSpace(step_id, title, question, txt_space, space_number,
                          answer, caseless, show_correct, score_formula, score)
 
-    def __init__(self, step_id, title, text, txt_space, space_number,
+    def __init__(self, step_id, title, text, space, space_number,
                  answer, caseless, show_correct, score_formula, score):
         super().__init__(step_id, title, text)
-        self.txt_space = txt_space
+        self.space = space
         self.space_number = space_number
         self.answer = answer
         self.caseless = caseless
@@ -116,21 +116,15 @@ class StepSpace(Step):
         self.score = score
 
     def to_json(self):
-        result = {
-            "id": self.step_id,
+        return {
             "title": self.title,
-            "name": "space",
+            "name": "fill-blanks",
             "text": self.text,
-            "text with space": self.txt_space,
-            "space number": self.space_number,
-            "answer": self.answer,
-            "caseless": self.caseless,
-            "show correct": self.show_correct,
-            "score formula": self.score_formula,
-            "score": self.score
+            "source": {
+                "options": self.space
+            },
+            "is_html_enabled": True
         }
-
-        return result
 
     def validate(self):
         """
@@ -138,7 +132,7 @@ class StepSpace(Step):
         """
         if not self.text:
             raise ValueError("Question must not be empty.")
-        if not self.txt_space:
+        if not self.space:
             raise ValueError("Text with space must not be empty.")
         if self.space_number <= 0:
             raise ValueError("Space number must be more than zero")

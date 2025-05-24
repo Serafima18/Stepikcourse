@@ -1,11 +1,8 @@
 import requests
 import re
-from requests.exceptions import HTTPError
 from base64 import b64encode
 import yaml
 from pathlib import Path
-from typing import List
-from dataclasses import dataclass, field
 from markdown import markdown
 
 
@@ -16,7 +13,7 @@ class Step:
     def __init__(self, step_id: int, title: str, text: str):
         self.step_id = step_id
         self.title = title
-        self.text = markdown(text)
+        self.text = markdown(text).replace("\n", "<br>")
 
     def to_json(self) -> dict:
         raise NotImplementedError("Subclasses should implement this!")
@@ -80,11 +77,7 @@ class Step:
 
         return response.json()
 
-    def update_json(self):
-        pass
-
     def update(self, step_url: str, token: str) -> dict:
-        self.update_json()
         step_source = self.get_step_source(step_url, token)
         lesson_id, step_pos = self._get_lesson_and_position(step_url)
         

@@ -239,7 +239,6 @@ class StepikCourseTools:
         except Exception as e:
             print(f"🚫 Ошибка при обновлении шага: {e}")
 
-
     def _handle_lesson_upload(self, update_existing: bool):
         folder = Path("example")
         md_files = list(folder.glob("*.md"))
@@ -328,7 +327,6 @@ class StepikCourseTools:
 
         except Exception as e:
             print(f"🚫 Ошибка при создании шага: {e}")
-
 
     def interactive_dialog(self):
         print("=== Stepik Tools ===")

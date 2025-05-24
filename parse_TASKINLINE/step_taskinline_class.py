@@ -20,7 +20,7 @@ class StepTaskinline(Step):
         # Базовые элементы
         section_keyword = pp.oneOf(["CODE", "HEADER", "FOOTER", "TEST", "CONFIG"])
         colon = pp.Suppress(pp.Optional(pp.White()) + pp.Literal(":") + pp.Optional(pp.White()))
-        newline = pp.Suppress(pp.LineEnd())
+        # newline = pp.Suppress(pp.LineEnd())
         stringEnd = pp.stringEnd
 
         # Разделители тестов
@@ -57,20 +57,20 @@ class StepTaskinline(Step):
 
             return config
 
-        config_section = (pp.Literal("CONFIG") + pp.OneOrMore(config_line)
-            ).setParseAction(lambda t: {"type": "CONFIG", "data": parse_config(t)})
+        config_section = (
+                pp.Literal("CONFIG") + pp.OneOrMore(config_line)
+        ).setParseAction(lambda t: {"type": "CONFIG", "data": parse_config(t)})
 
         # TEST
         test_input = pp.SkipTo(test_delimiter).leaveWhitespace()
         test_output = pp.SkipTo(test_end).leaveWhitespace()
 
-        test_case = (test_input + test_delimiter + 
-            test_output + test_end).setParseAction(
+        test_case = (
+                test_input + test_delimiter + test_output + test_end).setParseAction(
             lambda t: {"input": t[0].strip('\n'), "output": t[1].strip('\n')}
         )
 
-        test_section = (pp.Literal("TEST") + 
-            pp.OneOrMore(test_case)).setParseAction(
+        test_section = (pp.Literal("TEST") + pp.OneOrMore(test_case)).setParseAction(
             lambda t: {"type": "TEST", "data": t[1:]})
 
         # Парсер для других секций
@@ -176,7 +176,6 @@ class StepTaskinline(Step):
                     "sample_size": 100
                 }
             }
-
 
     def validate(self):
         """

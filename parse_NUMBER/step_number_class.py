@@ -1,5 +1,5 @@
-import pyparsing  as pp
-from re           import VERBOSE
+import pyparsing as pp
+from re import VERBOSE
 from step_classes import Step
 
 
@@ -18,22 +18,23 @@ class StepNumber(Step):
                     (?P<float2>\.\d+)           # match .02
                 )
                 (?P<float3>[Ee][+-]?\d+)?      # optional exponent
-                """, flags=VERBOSE
-                )
+                """, flags=VERBOSE)
 
         def convert_number(t: pp.ParseResults):
             """Convert a string matching a number to a python number"""
-            if t.float1 or t.float2 or t.float3 : return [float(t[0])]
-            else                                : return [int(t[0])  ]
+            if t.float1 or t.float2 or t.float3:
+                return [float(t[0])]
+            else:
+                return [int(t[0])]
 
         number.setParseAction(convert_number)
 
-        #tolerance = pp.Suppress("+-") + number
+        # tolerance = pp.Suppress("+-") + number
 
         parse_answer = (
             pp.Suppress("ANSWER:")
-            + number ("value")
-            + pp.Optional(pp.Suppress("+-") + number ("tolerance")) 
+            + number("value")
+            + pp.Optional(pp.Suppress("+-") + number("tolerance"))
         )
 
         lines = [line for line in text.splitlines()]
@@ -62,10 +63,10 @@ class StepNumber(Step):
                 else:
                     results["tolerance"] = 0
 
-                #results["answer"].append(answer_result.value)
-                #if answer_result.tolerance:
+                # results["answer"].append(answer_result.value)
+                # if answer_result.tolerance:
                 #    results["tolerance"].append(answer_result.tolerance)
-                #else:
+                # else:
                 #    results["tolerance"].append(0)
 
         return StepNumber(step_id, title, results["text"], results["answer"], results["tolerance"])
@@ -89,12 +90,11 @@ class StepNumber(Step):
                 }
             }
 
-
     def validate(self) -> None:
         """
         Проверяет, что все необходимые атрибуты заданы корректно.
         """
         if self.answer is None:
             raise ValueError("Answer must not be None.")
-        if self.tolerance < 0:
+        if self.tolerance[0] == '-':
             raise ValueError("Tolerance must not be negative.")

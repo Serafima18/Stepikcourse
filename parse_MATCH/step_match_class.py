@@ -56,7 +56,7 @@ class StepMatching(Step):
         self.pairs = pairs
 
     def to_json(self):
-        result = {
+        return {
             "text": self.text,
             "name": "matching",
             "source": {
@@ -65,8 +65,6 @@ class StepMatching(Step):
                 "pairs": self.pairs
             }
         }
-
-        return result
 
     def validate(self):
         """

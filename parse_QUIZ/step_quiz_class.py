@@ -59,7 +59,8 @@ class StepQuiz(Step):
                 is_mlt = (len(answer) > 1)
 
                 for key in possible_answers_tmp.keys():
-                    possible_answers.append({"text": markdown(key), "is_correct": False, "feedback": "Wrong"})
+                    possible_answers.append(
+                        {"text": markdown(key).replace("\n", "<br>"), "is_correct": False, "feedback": "Wrong"})
 
                     if possible_answers_tmp[key] in answer:
                         possible_answers[-1]["is_correct"] = True
@@ -80,7 +81,7 @@ class StepQuiz(Step):
         self.is_mlt = is_mlt
 
     def to_json(self):
-        block = {
+        return {
             "name": "choice",
             "text": self.text,
             "source": {
@@ -94,8 +95,6 @@ class StepQuiz(Step):
                 "is_options_feedback": False
             }
         }
-
-        return block
 
     def validate(self):
         """

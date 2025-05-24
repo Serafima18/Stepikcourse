@@ -17,11 +17,11 @@ step_test = Step.parse(1, 'title', text, 'SPACE')
 
 
 def test_parse_space2_question():
-    assert step_test.text == markdown('Some question')
+    assert step_test.text == markdown('Some question').replace("\n", "<br>")
 
 
 def test_parse_space2_txt_space():
-    assert step_test.txt_space == '''First space ___ second space ___
+    assert step_test.space == '''First space ___ second space ___
 Third space ___'''
 
 

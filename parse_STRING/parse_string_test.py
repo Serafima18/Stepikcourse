@@ -8,7 +8,7 @@ def test_parsing_string1():
 ANSWER: Синий
 '''
     step_test = Step.parse(1, 'title', text, "STRING")
-    assert step_test.text == markdown("Какой ваш любимый цвет?")
+    assert step_test.text == markdown("Какой ваш любимый цвет?").replace("\n", "<br>")
     assert step_test.answer == "Синий"
 
 
@@ -19,7 +19,7 @@ def test_parsing_string2():
 ANSWER: MIPT
 '''
     step_test = Step.parse(1, 'title', text, "STRING")
-    assert step_test.text == markdown('Попросим студента написать "MIPT". Напишите "MIPT".\n')
+    assert step_test.text == markdown('Попросим студента написать "MIPT". Напишите "MIPT".\n').replace("\n", "<br>")
     assert step_test.answer == "MIPT"
 
 
@@ -36,5 +36,5 @@ ANSWER:  Я учусь в МФТИ
     assert step_test.text == markdown('''Попросим студента написать "Я учусь в МФТИ". Напишите  "Я учусь в МФТИ".
 
 Много строк в условии.
-''')
+''').replace("\n", "<br>")
     assert step_test.answer == "Я учусь в МФТИ"

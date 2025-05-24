@@ -23,7 +23,7 @@ MATCH
 
     step_test = Step.parse(1, 'title', text, 'MATCHING')
 
-    assert step_test.text == markdown('Какой-то вопрос???')
+    assert step_test.text == markdown('Какой-то вопрос???').replace("\n", "<br>")
     assert step_test.pairs == [
         {
             'first': 'строка 1',
@@ -65,7 +65,7 @@ match3
 '''
     step_test = Step.parse(1, 'title', text, 'MATCHING')
 
-    assert step_test.text == markdown('Question???\nQuestion question')
+    assert step_test.text == markdown('Question???\nQuestion question').replace("\n", "<br>")
 
     assert step_test.pairs == [
         {
@@ -116,7 +116,7 @@ match3
 '''
     step_test = Step.parse(1, 'title', text, 'MATCHING')
 
-    assert step_test.text == markdown('Question???\n\nQuestion question')
+    assert step_test.text == markdown('Question???\n\nQuestion question').replace("\n", "<br>")
 
     assert step_test.pairs == [
         {

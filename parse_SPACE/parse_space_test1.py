@@ -18,7 +18,7 @@ step_test = Step.parse(1, 'title', text, "SPACE")
 
 
 def test_parsing_space1_question():
-    assert step_test.text == markdown('Тут будет текст вопроса на несколько строк.')
+    assert step_test.text == markdown('Тут будет текст вопроса на несколько строк.').replace("\n", "<br>")
 
 
 def test_parsing_space1_answer():
@@ -38,7 +38,7 @@ def test_parsing_space1_answer():
 
 
 def test_parsing_space1_txt_space():
-    assert step_test.txt_space == '''2 + 2 = ____ это ввод, указываем правильный ответ
+    assert step_test.space == '''2 + 2 = ____ это ввод, указываем правильный ответ
 2 + 3 = ____ тоже ввод, но вариантов правильного ответа несколько
 2 + 4 = ____ это выбор с указанием правильных выборов'''
 
