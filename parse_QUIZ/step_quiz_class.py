@@ -1,5 +1,6 @@
 from step_classes import Step
 import pyparsing as pp
+from markdown import markdown
 
 
 class StepQuiz(Step):
@@ -14,12 +15,12 @@ class StepQuiz(Step):
 
         lines = [line for line in text.splitlines()]
 
-        parse_poss_ans = pp.Word(pp.alphas, exact=1) + pp.Suppress(pp.Word(').', exact=1)) + pp.SkipTo(pp.LineEnd())
+        parse_poss_ans = pp.Word(pp.alphas, exact=1) + pp.Suppress(pp.Word(').', exact=1)) + pp.SkipTo(pp.StringEnd())
         parse_shuffle = pp.Suppress('SHUFFLE:') + (pp.CaselessLiteral('True') | pp.CaselessLiteral('False'))
         parse_answer = pp.Suppress('ANSWER:') + pp.delimitedList(pp.Word(pp.alphas, exact=1))
 
         flag = ''
-        tmp = ''
+        tmp = ['', False]
 
         for line in lines:
             if not answer and not possible_answers_tmp and flag != 'TEXTEND':
@@ -42,9 +43,8 @@ class StepQuiz(Step):
                 if not parse_answer.matches(line):
                     if parse_poss_ans.matches(line.lstrip()):
                         poss_ans = parse_poss_ans.parseString(line.lstrip()).asList()
-                        tmp = poss_ans[1]
+                        tmp = [poss_ans[1], True]
                         possible_answers_tmp[poss_ans[1]] = poss_ans[0]
-                        possible_answers.append({"text": poss_ans[1], "is_correct": False})
                         continue
 
             if parse_shuffle.matches(line):
@@ -58,20 +58,18 @@ class StepQuiz(Step):
 
                 is_mlt = (len(answer) > 1)
 
-                for i in range(len(possible_answers)):
-                    if possible_answers_tmp[possible_answers[i]["text"]] in answer:
-                        possible_answers[i]["is_correct"] = True
+                for key in possible_answers_tmp.keys():
+                    possible_answers.append({"text": markdown(key), "is_correct": False, "feedback": "Wrong"})
+
+                    if possible_answers_tmp[key] in answer:
+                        possible_answers[-1]["is_correct"] = True
+                        possible_answers[-1]["feedback"] = "Right"
                 continue
 
-            if tmp:
-                if '\n' in possible_answers_tmp[tmp] or line.strip():
-                    possible_answers_tmp[tmp] += '\n' + line
-
-        for i in range(len(possible_answers)):
-            if possible_answers[i]["is_correct"]:
-                possible_answers[i]["feedback"] = "Right"
-            else:
-                possible_answers[i]["feedback"] = "Wrong"
+            if tmp[1]:
+                key = tmp[0] + '\n' + line
+                possible_answers_tmp[key] = possible_answers_tmp.pop(tmp[0])
+                tmp[0] = key
 
         return StepQuiz(step_id, title, question, possible_answers, is_mlt, shuffle)
 

@@ -8,7 +8,7 @@ import yaml
 import json
 import re
 from pathlib import Path
-from typing import Optional, Dict
+from typing import Dict
 from lesson_classes import Lesson
 from step_classes import Step, StepikAPI
 from h1_h2_steps.h1_h2_steps import parse_text
@@ -265,7 +265,7 @@ class StepikCourseTools:
     def _handle_add_step_to_lesson(self):
         try:
             print("Выберите тип шага:")
-            step_types = ["TEXT", "MATCHING", "NUMBER", "QUIZ", "SPACE", "STRING"]
+            step_types = ["TEXT", "MATCHING", "NUMBER", "QUIZ", "SPACE", "STRING", "TASKINLINE"]
             for idx, t in enumerate(step_types, 1):
                 print(f"{idx}. {t}")
             step_choice = int(input("Введите номер типа шага: "))

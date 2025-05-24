@@ -26,20 +26,24 @@ markdown('''Отметьте правильные ответы. SHUFFLE - пер
 ''')
     assert step_test.possible_answers == [
         {
-            "text": "Это правильный ответ.",
-            "is_correct": True
-        },
-        {
-            "text": "Нет.",
-            "is_correct": False,
-        },
-        {
-            "text": "Тоже хорошо.",
+            "text": markdown("Это правильный ответ."),
             "is_correct": True,
+            "feedback": "Right"
         },
         {
-            "text": "Еще один правильный.",
-            "is_correct": True
+            "text": markdown("Нет."),
+            "is_correct": False,
+            "feedback": "Wrong"
+        },
+        {
+            "text": markdown("Тоже хорошо."),
+            "is_correct": True,
+            "feedback": "Right"
+        },
+        {
+            "text": markdown("Еще один правильный."),
+            "is_correct": True,
+            "feedback": "Right"
         }
     ]
     assert not step_test.shuffle
@@ -95,16 +99,19 @@ def square(size, col='blue'):
 ''')
     assert step_test.possible_answers == [
         {
-            "text": "square(100, 'red') нарисует красный квадрат размером 100",
-            "is_correct": True
+            "text": markdown("square(100, 'red') нарисует красный квадрат размером 100"),
+            "is_correct": True,
+            "feedback": "Right"
         },
         {
-            "text": "square(100) нарисует красный квадрат размером 100",
-            "is_correct": False
+            "text": markdown("square(100) нарисует красный квадрат размером 100"),
+            "is_correct": False,
+            "feedback": "Wrong"
         },
         {
-            "text": "square(100) нарисует синий квадрат размером 100",
-            "is_correct": True
+            "text": markdown("square(100) нарисует синий квадрат размером 100"),
+            "is_correct": True,
+            "feedback": "Right"
         }
     ]
     assert step_test.shuffle
@@ -128,18 +135,38 @@ print(x)
 ANSWER: C
 '''
     step_test = Step.parse(1, 'title', text, "QUIZ")
+    print(step_test.possible_answers)
     assert step_test.text == \
 markdown('''Это вопрос в формате AIKEN. SHUFFLE - перемешивать ответы при очередном прохождении теста.
 По умолчанию они перемешиваются. Отключается перемешивание установкой опции в значение false (без учета регистра).
 ''')
-    assert step_test.possible_answers == {
-               'ответ 1': False,
-               '''В ответе может быть любое форматирование, даже код. В коде знаки < и > должны быть обрамлены пробелами с двух сторон (баг на stepik).
+    assert step_test.possible_answers == [
+        {
+            "text": markdown("ответ 1"),
+            "is_correct": False,
+            "feedback": "Wrong"
+        },
+        {
+            "text": \
+markdown('''В ответе может быть любое форматирование, даже код. В коде знаки < и > должны быть обрамлены пробелами с двух сторон (баг на stepik).
+
 if 2 < 3:
-    print('Hello, world!')''': False,
-               'answer 2 правильный': True,
-               '''
+    print('Hello, world!')'''),
+            "is_correct": False,
+            "feedback": "Wrong"
+        },
+        {
+            "text": markdown("answer 2 правильный"),
+            "is_correct": True,
+            "feedback": "Right"
+        },
+        {
+            "text": markdown('''
+
 x = 'Ответ только из блока кода, блок кода надо написать с новой строки'
-print(x)''': False
-           }
+print(x)'''),
+            "is_correct": False,
+            "feedback": "Wrong"
+        }
+    ]
     assert step_test.shuffle

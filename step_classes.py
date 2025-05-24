@@ -132,6 +132,7 @@ class Step:
         from parse_MATCH.step_match_class import StepMatching
         from parse_NUMBER.step_number_class import StepNumber
         from parse_TASKINLINE.step_taskinline_class import StepTaskinline
+        from parse_SPACE.step_space_class import StepSpace
 
         # Маппинг шагов с типами
         step_classes = {
@@ -140,7 +141,8 @@ class Step:
             'NUMBER': StepNumber,
             'QUIZ': StepQuiz,  # Обработчик для QUIZ
             'MATCHING': StepMatching,
-            'TASKINLINE': StepTaskinline
+            'TASKINLINE': StepTaskinline,
+            'SPACE': StepSpace
         }
 
         # Проверяем, что шаг существует в маппинге
