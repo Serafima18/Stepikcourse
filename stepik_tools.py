@@ -263,6 +263,7 @@ class StepikCourseTools:
 
     def _handle_add_step_to_lesson(self):
         try:
+            '''
             print("Выберите тип шага:")
             step_types = ["TEXT", "MATCHING", "NUMBER", "QUIZ", "SPACE", "STRING", "TASKINLINE"]
             for idx, t in enumerate(step_types, 1):
@@ -272,6 +273,7 @@ class StepikCourseTools:
                 print("❌ Неверный выбор типа")
                 return
             step_type = step_types[step_choice - 1]
+            '''
 
             folder = Path("example")
             md_files = list(folder.glob("*.md"))
@@ -301,29 +303,29 @@ class StepikCourseTools:
                 print("❌ В файле не найден шаг")
                 return
 
-            # Определяем позицию — добавляем в конец
-            headers = {
-                'Authorization': f'Bearer {self.token}',
-                'Content-Type': 'application/json'
-            }
-            response = requests.get(
-                f'https://stepik.org/api/lessons/{lesson_id}',
-                headers=headers
-            )
-            response.raise_for_status()
-            step_count = len(response.json()['lessons'][0].get('steps', []))
-            position = step_count + 1
+            for step_data in steps:
+                # Определяем позицию — добавляем в конец
+                headers = {
+                    'Authorization': f'Bearer {self.token}',
+                    'Content-Type': 'application/json'
+                }
+                response = requests.get(
+                    f'https://stepik.org/api/lessons/{lesson_id}',
+                    headers=headers
+                )
+                response.raise_for_status()
+                step_count = len(response.json()['lessons'][0].get('steps', []))
+                position = step_count + 1
 
-            step_data = steps[0]
-            step = Step.parse(
-                step_id=0,
-                title=step_data['header'],
-                text=step_data['text'],
-                step_type=step_type
-            )
+                step = Step.parse(
+                    step_id=0,
+                    title=step_data['header'],
+                    text=step_data['text'],
+                    step_type=step_data['type']
+                )
 
-            step.create(lesson_id, position, self.token)
-            print(f"✅ Шаг типа {step_type} добавлен в урок {lesson_id} в позицию {position}")
+                step.create(lesson_id, position, self.token)
+                print(f"✅ Шаг типа {step_data['type']} добавлен в урок {lesson_id} в позицию {position}")
 
         except Exception as e:
             print(f"🚫 Ошибка при создании шага: {e}")

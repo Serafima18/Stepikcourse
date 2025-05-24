@@ -1,4 +1,4 @@
-lesson_id: 1771198
+lesson_id: 1777833
 
 ## STRING Напишите строку
 

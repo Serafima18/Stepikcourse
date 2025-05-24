@@ -17,7 +17,7 @@ parse_lang = (lang_key + lang_value)
 skip = pp.Literal("SKIP")("skip")
 h2_start = pp.Literal("##")
 
-task_types = ["TEXT", "PROBLEM", "QUIZ", "NUMBER", "STRING", "VIDEO", "TASK", "TASKINLINE"]
+task_types = ["TEXT", "QUIZ", "NUMBER", "STRING", "TASKINLINE", "MATCHING", "SPACE"]
 task_type = pp.oneOf(task_types)("type")
 
 header = pp.restOfLine("header")
