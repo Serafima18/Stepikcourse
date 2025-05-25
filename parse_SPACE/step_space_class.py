@@ -1,6 +1,6 @@
 import pyparsing as pp
-import re
 from step_classes import Step
+from markdown import markdown
 
 
 class StepSpace(Step):
@@ -10,12 +10,7 @@ class StepSpace(Step):
 
         question = ""
         txt_space = ""
-        space_number = 0
-        answer = {
-            'space with choice': {},
-            'space without': {}
-        }
-
+        components = []
         caseless = True
         show_correct = True
         score_formula = True
@@ -35,6 +30,14 @@ class StepSpace(Step):
         for line in lines:
             if flag == 'SPACETEXT':
                 if parse_config.matches(line):
+                    if txt_space:
+                        components.append(
+                            {
+                                "type": "text",
+                                "text": markdown(txt_space).replace("\n", "<br>"),
+                                "options": []
+                            }
+                        )
                     flag = 'CONFIG'
                     continue
 
@@ -42,37 +45,51 @@ class StepSpace(Step):
                     txt_space += '\n'
 
                 if '___' in line:
-                    inner_content = pp.CharsNotIn("[]")
-                    enclosed = pp.Suppress("___[") + inner_content + pp.Suppress("]")
+                    enclosed = pp.Suppress("___[") + pp.CharsNotIn("[]") + pp.Suppress("]")
 
-                    extracted_list = enclosed.searchString(line)
+                    ln = enclosed.searchString(line).asList()
 
-                    ln = [item[0] for item in extracted_list]
-                    num = len(ln)
+                    for i in range(len(ln)):
+                        line_t = list(line)
+                        components.append(
+                            {
+                                "type": "text",
+                                "text": markdown(txt_space + line[:line_t.index('_')]).replace("\n", "<br>"),
+                                "options": []
+                            }
+                        )
 
-                    line = re.sub(r"___\[[^\]]+\]", "___", line)
+                        line = line[line_t.index(']') + 1:]
+                        txt_space = ""
+                        tmp = parse_answer.parseString(ln[i][0]).asList()
 
-                    for i in range(num):
-                        n = space_number + i + 1
-                        tmp = (parse_answer.parseString(ln[i])).asList()
-
-                        if ';@' in ln[i]:
-                            answer['space with choice'][n] = {'right ans': [], 'all ans': []}
+                        if ';@' in ln[i][0]:
+                            components.append(
+                                {
+                                    "type": "select",
+                                    "options": [],
+                                    "text": ""
+                                }
+                            )
 
                             for one_ans in tmp:
                                 if not one_ans:
                                     continue
 
                                 if one_ans[0] == '@':
-                                    one_ans = one_ans[1:]
-                                    answer['space with choice'][n]['right ans'].append(one_ans)
-
-                                answer['space with choice'][n]['all ans'].append(one_ans)
+                                    components[-1]["options"].append({"text": one_ans[1:], "is_correct": True})
+                                else:
+                                    components[-1]["options"].append({"text": one_ans, "is_correct": False})
                         else:
-                            answer['space without'][n] = tmp
+                            components.append({
+                                "type": "input",
+                                "options": [],
+                                "text": "",
+                            })
 
-                    txt_space += line
-                    space_number += num
+                            for one_ans in tmp:
+                                components[-1]["options"].append({"text": one_ans, "is_correct": True})
+                txt_space = line
                 continue
 
             if parse_spacetext.matches(line):
@@ -101,15 +118,11 @@ class StepSpace(Step):
                 score = int(parse_score.parseString(line)[0])
                 continue
 
-        return StepSpace(step_id, title, question, txt_space, space_number,
-                         answer, caseless, show_correct, score_formula, score)
+        return StepSpace(step_id, title, question, components, caseless, show_correct, score_formula, score)
 
-    def __init__(self, step_id, title, text, space, space_number,
-                 answer, caseless, show_correct, score_formula, score):
+    def __init__(self, step_id, title, text, components, caseless, show_correct, score_formula, score):
         super().__init__(step_id, title, text)
-        self.space = space
-        self.space_number = space_number
-        self.answer = answer
+        self.components = components
         self.caseless = caseless
         self.show_correct = show_correct
         self.score_formula = score_formula
@@ -121,7 +134,8 @@ class StepSpace(Step):
             "name": "fill-blanks",
             "text": self.text,
             "source": {
-                "options": self.space
+                "is_case_sensitive": not self.caseless,
+                "components": self.components
             },
             "is_html_enabled": True
         }
@@ -132,9 +146,5 @@ class StepSpace(Step):
         """
         if not self.text:
             raise ValueError("Question must not be empty.")
-        if not self.space:
-            raise ValueError("Text with space must not be empty.")
-        if self.space_number <= 0:
-            raise ValueError("Space number must be more than zero")
-        if not self.answer:
-            raise ValueError("Answer must not be empty.")
+        if not self.components:
+            raise ValueError("Components must not be empty.")

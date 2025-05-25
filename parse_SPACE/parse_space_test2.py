@@ -20,29 +20,34 @@ def test_parse_space2_question():
     assert step_test.text == markdown('Some question').replace("\n", "<br>")
 
 
-def test_parse_space2_txt_space():
-    assert step_test.space == '''First space ___ second space ___
-Third space ___'''
-
-
-def test_parse_space2_space_number():
-    assert step_test.space_number == 3
-
-
-def test_parse_space2_answer():
-    assert step_test.answer == {
-        'space with choice': {
-            2: {
-                'right ans': ['2'],
-                'all ans': ['1', '2', '3']
-            }
+def test_parse_space2_components():
+    assert step_test.components == [
+        {
+            "type": "text",
+            "content": markdown("First space ").replace("\n", "<br>")
         },
-
-        'space without': {
-            1: ['1', '2', '3'],
-            3: ['4', '5']
+        {
+            "type": "input",
+            "correct": ["1", "2", "3"]
+        },
+        {
+            "type": "text",
+            "content": markdown(" second space ").replace("\n", "<br>")
+        },
+        {
+            "type": "select",
+            "options": ["1", "2", "3"],
+            "correct": ["2"]
+        },
+        {
+            "type": "text",
+            "content": markdown("Third space ").replace("\n", "<br>")
+        },
+        {
+            "type": "input",
+            "correct": ["4", "5"]
         }
-    }
+    ]
 
 
 def test_parse_space2_caseless():

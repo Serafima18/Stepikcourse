@@ -21,30 +21,40 @@ def test_parsing_space1_question():
     assert step_test.text == markdown('Тут будет текст вопроса на несколько строк.').replace("\n", "<br>")
 
 
-def test_parsing_space1_answer():
-    assert step_test.answer == {
-        'space with choice': {
-            3: {
-                'right ans': ['6', 'шесть'],
-                'all ans': ['4', '5', '6', '7', 'шесть', 'пять']
-            }
+def test_parsing_space1_components():
+    assert step_test.components == [
+        {
+            "type": "text",
+            "content": markdown("2 + 2 = ").replace("\n", "<br>")
         },
-
-        'space without': {
-            1: ['4'],
-            2: ['5', 'пять']
+        {
+            "type": "input",
+            "correct": ["4"]
+        },
+        {
+            "type": "text",
+            "content": markdown(''' это ввод, указываем правильный ответ
+2 + 3 = ''').replace("\n", "<br>")
+        },
+        {
+            "type": "input",
+            "correct": ["5", "пять"]
+        },
+        {
+            "type": "text",
+            "content": markdown(''' тоже ввод, но вариантов правильного ответа несколько
+2 + 4 = ''').replace("\n", "<br>")
+        },
+        {
+            "type": "select",
+            "options": ["4", "5", "6", "7", "шесть", "пять"],
+            "correct": ["6", "шесть"]
+        },
+        {
+            "type": "text",
+            "content": markdown(" это выбор с указанием правильных выборов").replace("\n", "<br>")
         }
-    }
-
-
-def test_parsing_space1_txt_space():
-    assert step_test.space == '''2 + 2 = ____ это ввод, указываем правильный ответ
-2 + 3 = ____ тоже ввод, но вариантов правильного ответа несколько
-2 + 4 = ____ это выбор с указанием правильных выборов'''
-
-
-def test_parsing_space1_space_number():
-    assert step_test.space_number == 3
+    ]
 
 
 def test_parsing_space1_caseless():
