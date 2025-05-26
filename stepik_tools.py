@@ -8,7 +8,6 @@ import yaml
 import json
 import re
 from pathlib import Path
-from typing import Dict
 from lesson_classes import Lesson
 from step_classes import Step, StepikAPI
 from h1_h2_steps.h1_h2_steps import parse_text
@@ -22,7 +21,21 @@ class StepikCourseTools:
         self.lessons = []
         self.current_lesson = None
 
-    def load_credentials(self):
+    @staticmethod
+    def open_file():
+        file_name = input("Введите путь к файлу (например, example/example.md): ")
+
+        if not Path(file_name).exists():
+            print("Файл не найден")
+            return None
+
+        if not re.search(r"\.md$", file_name, re.IGNORECASE):
+            print("Это не markdown файл")
+            return None
+        return file_name
+
+    @staticmethod
+    def load_credentials():
         try:
             with open("creds.yaml", 'r') as f:
                 creds = yaml.safe_load(f)
@@ -45,16 +58,8 @@ class StepikCourseTools:
             print(f"Ошибка аутентификации: {e}")
             return False
 
-    def parse_step_from_markdown(self, id: int, step_data: Dict) -> Step:
-        step_type = step_data['type']
-        step_id = id
-        title = step_data['header']
-        text = step_data['text']
-
-        # Вызов строго через Step.parse (он не должен быть переопределён в наследниках)
-        return Step.parse(step_id, title, text, step_type.upper())
-
-    def save_lesson_to_markdown(self, lesson: Lesson, filename: str) -> bool:
+    @staticmethod
+    def save_lesson_to_markdown(lesson: Lesson, filename: str) -> bool:
         try:
             with open(filename, 'w', encoding='utf-8') as f:
                 f.write(f"# lesson_id: {lesson.lesson_id}\n\n")
@@ -76,9 +81,10 @@ class StepikCourseTools:
             else:
                 print(f"Не удалось сохранить урок {lesson.lesson_id}")
 
-    def upload_lesson_from_markdown(self, file_path: str):
-        if not self.course_id:
-            print("Сначала укажите ID курса")
+    def upload_lesson_from_markdown(self):
+        file_path = self.open_file()
+
+        if not file_path:
             return
 
         try:
@@ -154,22 +160,14 @@ class StepikCourseTools:
         try:
             lesson_id = int(input("Введите ID урока, где нужно обновить шаг: "))
             step_pos = int(input("Введите номер шага для обновления: "))
-            folder = Path("example")
-            md_files = list(folder.glob("*.md"))
-            if not md_files:
-                print("В папке example нет .md файлов")
-                return
-            print("Доступные .md файлы:")
-            for idx, f in enumerate(md_files, 1):
-                print(f"{idx}. {f.name}")
-            file_name = input("Введите имя файла (например, first_lesson.md): ")
-            selected_path = folder / file_name
-            if not selected_path.exists():
-                print("Файл не найден")
+
+            file = self.open_file()
+
+            if not file:
                 return
 
             # Парсим шаги из файла
-            with open(selected_path, 'r', encoding='utf-8') as f:
+            with open(file, 'r', encoding='utf-8') as f:
                 text = f.read()
             lesson_data = parse_text(text)
             steps = lesson_data.get("steps", [])
@@ -189,22 +187,12 @@ class StepikCourseTools:
 
     def _handle_step_update_from_file_ids(self):
         try:
-            folder = Path("example")
-            md_files = list(folder.glob("*.md"))
-            if not md_files:
-                print("В папке example нет .md файлов")
+            file = self.open_file()
+
+            if not file:
                 return
 
-            print("Доступные .md файлы:")
-            for idx, f in enumerate(md_files, 1):
-                print(f"{idx}. {f.name}")
-            file_name = input("Введите имя файла (например, first_step.md): ")
-            selected_path = folder / file_name
-            if not selected_path.exists():
-                print("Файл не найден")
-                return
-
-            with open(selected_path, 'r', encoding='utf-8') as f:
+            with open(file, 'r', encoding='utf-8') as f:
                 raw_text = f.read()
 
             # Ищем lesson_id и step_id в тексте
@@ -239,58 +227,14 @@ class StepikCourseTools:
         except Exception as e:
             print(f"🚫 Ошибка при обновлении шага: {e}")
 
-    def _handle_lesson_upload(self, update_existing: bool):
-        folder = Path("example")
-        md_files = list(folder.glob("*.md"))
-        if not md_files:
-            print("В папке example нет .md файлов")
-            return
-
-        print("Доступные .md файлы:")
-        for idx, f in enumerate(md_files, 1):
-            print(f"{idx}. {f.name}")
-
-        file_name = input("Введите имя файла (например, first_lesson.md): ")
-        selected_path = folder / file_name
-        if not selected_path.exists():
-            print("Файл не найден")
-            return
-
-        if update_existing:
-            self.upload_lesson_from_markdown(selected_path)
-        else:
-            self.create_new_lesson_from_markdown(selected_path)
-
     def _handle_add_step_to_lesson(self):
         try:
-            '''
-            print("Выберите тип шага:")
-            step_types = ["TEXT", "MATCHING", "NUMBER", "QUIZ", "SPACE", "STRING", "TASKINLINE"]
-            for idx, t in enumerate(step_types, 1):
-                print(f"{idx}. {t}")
-            step_choice = int(input("Введите номер типа шага: "))
-            if step_choice < 1 or step_choice > len(step_types):
-                print("❌ Неверный выбор типа")
-                return
-            step_type = step_types[step_choice - 1]
-            '''
+            file = self.open_file()
 
-            folder = Path("example")
-            md_files = list(folder.glob("*.md"))
-            if not md_files:
-                print("В папке example нет .md файлов")
+            if not file:
                 return
 
-            print("Доступные .md файлы:")
-            for idx, f in enumerate(md_files, 1):
-                print(f"{idx}. {f.name}")
-            file_name = input("Введите имя файла (например, string.md): ")
-            selected_path = folder / file_name
-            if not selected_path.exists():
-                print("Файл не найден")
-                return
-
-            with open(selected_path, 'r', encoding='utf-8') as f:
+            with open(file, 'r', encoding='utf-8') as f:
                 text = f.read()
 
             parsed = parse_text(text)
@@ -314,8 +258,7 @@ class StepikCourseTools:
                     headers=headers
                 )
                 response.raise_for_status()
-                step_count = len(response.json()['lessons'][0].get('steps', []))
-                position = step_count + 1
+                position = len(response.json()['lessons'][0].get('steps', [])) + 1
 
                 step = Step.parse(
                     step_id=0,
@@ -359,23 +302,12 @@ class StepikCourseTools:
             choice = input("Выберите действие (1-6): ")
 
             if choice == '2':
-                self._handle_lesson_upload(update_existing=True)
+                self.upload_lesson_from_markdown()
 
             if choice == '1':
-                folder = Path("example")
-                md_files = list(folder.glob("*.md"))
-                if not md_files:
-                    print("В папке example нет .md файлов")
-                else:
-                    print("Доступные .md файлы:")
-                    for idx, f in enumerate(md_files, 1):
-                        print(f"{idx}. {f.name}")
-                    file_name = input("Введите имя файла (например, first_lesson.md): ")
-                    selected_path = folder / file_name
-                    if selected_path.exists():
-                        self.upload_lesson_from_markdown(selected_path)
-                    else:
-                        print("Файл не найден")
+                # self.upload_lesson_from_markdown()
+                print("Нереализовано")
+                continue
 
             elif choice == '5':
                 self._handle_step_deletion()
